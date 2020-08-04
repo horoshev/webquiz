@@ -1,0 +1,13 @@
+<div class="question-wrapper">
+
+  <div *ngIf="isLoading; else loaded">Loading...</div>
+  <ng-template #loaded>
+    <div *ngIf="isError; else success">Error...</div>
+    <ng-template #success>
+      <h2>#{{question.id}}</h2>
+      <p>{{question.text}}</p>
+      <p>{{question.answers}}</p>
+    </ng-template>
+  </ng-template>
+
+</div>

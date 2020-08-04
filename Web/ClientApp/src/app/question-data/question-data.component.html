@@ -1,0 +1,11 @@
+<div>
+  <button (click)="onGenerate()">Generate question data</button>
+
+  <div class="question-list">
+    <div *ngFor="let question of questions" class="question-item question-card shadow">
+      <p>{{question.text}}</p>
+      <p>{{question.answers}}</p>
+      <a href="/question/{{question.id}}">К вопросу</a>
+    </div>
+  </div>
+</div>
