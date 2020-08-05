@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using Web.Models;
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+@using Application.Entities
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
 
 @{
     string returnUrl = null;

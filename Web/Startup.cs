@@ -5,17 +5,13 @@ using Data.Repositories;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
-using Web.Data;
-using Web.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Unity;
+using Unity.Lifetime;
 
 namespace Web
 {
@@ -31,26 +27,21 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<IQuestionRepository, QuestionRepository>();
-            services.AddTransient<ISeedRepository, SeedRepository>();
-
-            // services.AddDbContext<ApplicationDbContext>(options =>
-            //     options.UseSqlite(
-            //         Configuration.GetConnectionString("DefaultConnection")));
-            //
-            // services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            //     .AddEntityFrameworkStores<ApplicationDbContext>();
-            //
-            // services.AddIdentityServer()
-            //     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
-            //
-            // services.AddAuthentication()
-            //     .AddIdentityServerJwt();
-
             services.AddDbContext<WebQuizDbContext>(builder =>
                 builder.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<User>(options =>
+                {
+                    options.User.RequireUniqueEmail = true;
+
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 4;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+
+                    options.SignIn.RequireConfirmedAccount = true;
+                })
                 .AddEntityFrameworkStores<WebQuizDbContext>();
 
             services.AddIdentityServer()
@@ -65,10 +56,11 @@ namespace Web
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/dist"; });
         }
 
-        // public void Configure(IUnityContainer container)
-        // {
-            // container.RegisterType<IUnityContainer, UnityContainer>();
-        // }
+        public void ConfigureContainer(IUnityContainer container)
+        {
+            container.RegisterType<IQuestionRepository, QuestionRepository>(TransientLifetimeManager.Instance);
+            container.RegisterType<ISeedRepository, SeedRepository>(TransientLifetimeManager.Instance);
+        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

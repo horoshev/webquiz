@@ -23,4 +23,10 @@ export class QuestionDataComponent implements OnInit {
   onGenerate() {
     this.http.post<void>(this.baseUrl + 'api/question/10', {}).subscribe(() => { }, error => console.error(error))
   }
+
+  onGetUser() {
+    this.http.get<any>(this.baseUrl + 'api/question/user').subscribe(
+      result => console.log(result),
+      error => console.error(error))
+  }
 }
