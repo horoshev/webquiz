@@ -1,0 +1,13 @@
+.quiz-container {
+  margin: 0 auto;
+  padding: 2rem 3rem;
+  max-width: 50rem;
+}
+
+.quiz-controls > .btn {
+  margin: 0 .2rem;
+}
+
+.quiz-controls > .btn:first-child {
+  margin-left: 0;
+}

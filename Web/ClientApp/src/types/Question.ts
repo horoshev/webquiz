@@ -1,6 +1,6 @@
 ﻿export interface Question {
   id: number
   text: string
-  answers: number
+  answers: string
   [key: string]: any
 }

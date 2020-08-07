@@ -1,10 +1,12 @@
 using Application.Entities;
 using Application.Interfaces;
+using Application.Services;
 using Data;
 using Data.Repositories;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Unity;
 using Unity.Lifetime;
+using Config = Web.IdentityServerConfiguration;
 
 namespace Web
 {
@@ -32,6 +35,9 @@ namespace Web
 
             services.AddDefaultIdentity<User>(options =>
                 {
+                    // options.ClaimsIdentity.UserIdClaimType = JwtClaimTypes.Subject; // ClaimTypes.NameIdentifier;
+                    // options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
+
                     options.User.RequireUniqueEmail = true;
 
                     options.Password.RequireDigit = false;
@@ -42,13 +48,41 @@ namespace Web
 
                     options.SignIn.RequireConfirmedAccount = true;
                 })
-                .AddEntityFrameworkStores<WebQuizDbContext>();
+                .AddEntityFrameworkStores<WebQuizDbContext>()
+                .AddDefaultTokenProviders();
 
             services.AddIdentityServer()
+                // .AddTestUsers(Config.TestUsers)
                 .AddApiAuthorization<User, WebQuizDbContext>();
+
+            /*
+            services.AddIdentityServer(options =>
+                {
+                    options.Events.RaiseErrorEvents = true;
+                    options.Events.RaiseInformationEvents = true;
+                    options.Events.RaiseFailureEvents = true;
+                    options.Events.RaiseSuccessEvents = true;
+
+                    // see https://identityserver4.readthedocs.io/en/latest/topics/resources.html
+                    // options.EmitStaticAudienceClaim = true;
+                })
+                .AddInMemoryIdentityResources(Config.IdentityResources)
+                // .AddInMemoryApiScopes(Config.ApiScopes)
+                .AddInMemoryClients(Config.Clients)
+                .AddAspNetIdentity<User>();
+            */
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();
+
+            /*
+            services.Configure<JwtBearerOptions>(
+                IdentityServerJwtConstants.IdentityServerJwtBearerScheme,
+                options =>
+                {
+                    options.Configuration = new OpenIdConnectConfiguration{}; 
+                });
+            */
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -60,6 +94,8 @@ namespace Web
         {
             container.RegisterType<IQuestionRepository, QuestionRepository>(TransientLifetimeManager.Instance);
             container.RegisterType<ISeedRepository, SeedRepository>(TransientLifetimeManager.Instance);
+
+            container.RegisterType<IQuestionService, QuestionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

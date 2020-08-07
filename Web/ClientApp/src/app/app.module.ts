@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
@@ -13,6 +13,9 @@ import { AuthorizeGuard } from 'src/api-authorization/authorize.guard';
 import { AuthorizeInterceptor } from 'src/api-authorization/authorize.interceptor';
 import { QuestionDataComponent } from './question-data/question-data.component';
 import { QuestionViewComponent } from './question-view/question-view.component';
+import { QuestionRandomComponent } from './question-random/question-random.component';
+import { QuestionCreateComponent } from './question-create/question-create.component';
+import { ProfileComponent } from './profile/profile.component';
 
 @NgModule({
   declarations: [
@@ -21,17 +24,24 @@ import { QuestionViewComponent } from './question-view/question-view.component';
     HomeComponent,
     FetchDataComponent,
     QuestionDataComponent,
-    QuestionViewComponent
+    QuestionViewComponent,
+    QuestionRandomComponent,
+    QuestionCreateComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     FormsModule,
+    ReactiveFormsModule,
     ApiAuthorizationModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'question', component: QuestionDataComponent },
+      { path: 'question/create', component: QuestionCreateComponent },
+      { path: 'question/random', component: QuestionRandomComponent },
       { path: 'question/:id', component: QuestionViewComponent },
+      { path: 'profile/:id', component: ProfileComponent },
       { path: 'fetch-data', component: FetchDataComponent, canActivate: [AuthorizeGuard] },
     ])
   ],

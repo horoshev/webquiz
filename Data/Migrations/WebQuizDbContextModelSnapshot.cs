@@ -33,7 +33,7 @@ namespace Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2020, 8, 4, 16, 56, 12, 294, DateTimeKind.Local).AddTicks(5316));
+                        .HasDefaultValue(new DateTime(2020, 8, 6, 15, 35, 0, 686, DateTimeKind.Local).AddTicks(9136));
 
                     b.Property<string>("Explanation")
                         .HasColumnType("TEXT");
@@ -45,7 +45,7 @@ namespace Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2020, 8, 4, 16, 56, 12, 298, DateTimeKind.Local).AddTicks(1708));
+                        .HasDefaultValue(new DateTime(2020, 8, 6, 15, 35, 0, 689, DateTimeKind.Local).AddTicks(2067));
 
                     b.HasKey("Id");
 
@@ -64,10 +64,6 @@ namespace Data.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
@@ -126,8 +122,6 @@ namespace Data.Migrations
                         .HasName("UserNameIndex");
 
                     b.ToTable("AspNetUsers");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("User");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.DeviceFlowCodes", b =>
@@ -344,16 +338,9 @@ namespace Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Application.Entities.Author", b =>
-                {
-                    b.HasBaseType("Application.Entities.User");
-
-                    b.HasDiscriminator().HasValue("Author");
-                });
-
             modelBuilder.Entity("Application.Entities.Question", b =>
                 {
-                    b.HasOne("Application.Entities.Author", "Author")
+                    b.HasOne("Application.Entities.User", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)

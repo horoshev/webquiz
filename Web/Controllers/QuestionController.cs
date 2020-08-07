@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Entities;
 using Application.Interfaces;
-using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Web.Common;
 
 namespace Web.Controllers
 {
@@ -15,31 +14,32 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class QuestionController : ControllerBase
     {
-        private readonly IQuestionRepository _repository;
+        private readonly IQuestionService _questionService;
         private readonly ISeedRepository _seedRepository;
         private readonly UserManager<User> _userManager;
 
         public QuestionController(
-            IQuestionRepository repository,
+            IQuestionService questionService,
             ISeedRepository seedRepository,
             UserManager<User> userManager)
         {
-            _repository = repository;
+            _questionService = questionService;
             _seedRepository = seedRepository;
             _userManager = userManager;
         }
 
+        // TODO: Pagination
         [HttpGet]
         public IEnumerable<Question> GetQuestions()
         {
-            return _repository.GetQuestions();
+            return _questionService.GetQuestions();
         }
 
         [HttpGet]
         [Route("{questionId}")]
         public IActionResult GetQuestionById(int questionId)
         {
-            var question = _repository.GetQuestionById(questionId);
+            var question = _questionService.GetQuestionById(questionId);
 
             if (question is null) return NotFound();
 
@@ -49,11 +49,9 @@ namespace Web.Controllers
         [Authorize]
         [HttpGet]
         [Route("random")]
-        public async Task<IActionResult> GetRandomQuestion()
+        public IActionResult GetRandomQuestion()
         {
-            var user = await _userManager.GetUserAsync(User);
-
-            var question = _repository.GetQuestionById(1);
+            var question = _questionService.GetRandomQuestion();
             if (question is null) return NotFound();
 
             return Ok(question);
@@ -62,28 +60,39 @@ namespace Web.Controllers
         [Authorize]
         [HttpGet]
         [Route("user")]
-        public async Task<IActionResult> GetCurrentUser()
+        public IActionResult GetCurrentUser()
         {
-            var user = await _userManager.GetUserAsync(User);
-            var username = _userManager.GetUserName(User);
+            // var id = User.GetSubjectIdentifier();
+            // var user = await _userManager.FindByIdAsync(id);
 
-            // Console.WriteLine(user is null);
-            // Console.WriteLine(User.IsAuthenticated());
-            // Console.WriteLine(username);
-            // Console.WriteLine(HttpContext.User.Identity?.Name);
+            // var jwtid = User.GetSubjectId();
+            // var user = await _userManager.GetUserAsync(User); // TODO: Figure out
 
             return Ok();
         }
 
         [Authorize]
         [HttpPost]
-        public IActionResult InsertQuestion(Question question)
+        public async Task<IActionResult> InsertQuestion(QuestionRequest questionRequest)
         {
-            var author = new Author(); // 
+            var id = User.GetSubjectIdentifier();
+            var author = await _userManager.FindByIdAsync(id);
 
-            if (question is null || author is null) return BadRequest();
+            if (questionRequest is null || author is null) return BadRequest();
 
-            _repository.InsertQuestion(question);
+            var question = new Question
+            {
+                Text = questionRequest.Text,
+                Answers = questionRequest.Answers.Aggregate((s, i) => $"{s} {i}").Trim(),
+                Explanation = questionRequest.Explanation,
+                Author = author
+            };
+
+            _questionService.InsertQuestion(question);
+            _questionService.Save();
+
+            string.IsNullOrEmpty("ds");
+            "ds".Contains('X');
 
             return Ok();
         }
@@ -97,30 +106,36 @@ namespace Web.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpDelete]
-        public IActionResult DeleteQuestion(int questionId)
+        public async Task<IActionResult> DeleteQuestion(int questionId)
         {
-            if (_repository.GetQuestionById(questionId) is null) return BadRequest();
+            var author = await _userManager.FindByIdAsync(User.GetSubjectIdentifier() ?? "");
+            var question = _questionService.GetQuestionById(questionId);
 
-            _repository.DeleteQuestion(questionId);
+            if (question is null || author is null) return BadRequest();
+            if (question.Author.Id != author.Id) return Forbid(); // you can`t delete other people questions
+
+            _questionService.DeleteQuestion(questionId);
 
             return NoContent();
         }
 
+        [Authorize]
         [HttpPut]
-        public IActionResult UpdateQuestion(Question question)
+        public async Task<IActionResult> UpdateQuestion(Question question)
         {
-            if (question is null) return BadRequest();
-            if (_repository.GetQuestionById(question.Id) is null) return NotFound();
+            var author = await _userManager.FindByIdAsync(User.GetSubjectIdentifier() ?? "");
+            if (question is null || author is null) return BadRequest();
 
-            _repository.UpdateQuestion(question);
+            var originalQuestion = _questionService.GetQuestionById(question.Id);
+            if (originalQuestion is null) return NotFound();
+
+            if (question.Author.Id != author.Id) return Forbid(); // you can`t modify other people questions
+
+            _questionService.UpdateQuestion(question);
 
             return NoContent();
-        }
-
-        public void Save()
-        {
-
         }
     }
 }

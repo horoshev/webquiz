@@ -41,8 +41,7 @@ namespace Data.Migrations
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true),
-                    Discriminator = table.Column<string>(nullable: false)
+                    LastName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -199,8 +198,8 @@ namespace Data.Migrations
                     Explanation = table.Column<string>(nullable: true),
                     Answers = table.Column<string>(nullable: false),
                     AuthorId = table.Column<string>(nullable: false),
-                    CreatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 4, 16, 56, 12, 294, DateTimeKind.Local).AddTicks(5316)),
-                    UpdatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 4, 16, 56, 12, 298, DateTimeKind.Local).AddTicks(1708))
+                    CreatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 6, 15, 35, 0, 686, DateTimeKind.Local).AddTicks(9136)),
+                    UpdatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 6, 15, 35, 0, 689, DateTimeKind.Local).AddTicks(2067))
                 },
                 constraints: table =>
                 {

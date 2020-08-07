@@ -22,7 +22,7 @@ namespace Application.Entities
         public List<Uri> Sources { get; set; }
 
         [Required]
-        public Author Author { get; set; }
+        public User Author { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime CreatedAt { get; set; } = DateTime.Now;

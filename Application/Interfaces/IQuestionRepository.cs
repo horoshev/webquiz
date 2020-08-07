@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Application.Entities;
+using Application.Services;
 
 namespace Application.Interfaces
 {
@@ -7,6 +8,8 @@ namespace Application.Interfaces
     {
         IEnumerable<Question> GetQuestions();
         Question GetQuestionById(int questionId);
+        Question GetQuestionByIndex(int index);
+        int QuestionsCount();
         void InsertQuestion(Question question);
         void DeleteQuestion(int questionId);
         void UpdateQuestion(Question question);

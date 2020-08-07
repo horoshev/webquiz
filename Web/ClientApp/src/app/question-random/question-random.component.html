@@ -1,0 +1,27 @@
+<div class="quiz-container question-card shadow">
+
+  <div class="h3">#{{question.id}}</div>
+  <p class="question-text">{{question.text}}</p>
+
+  <div class="answer-input">
+    <div class="input-group mb-3">
+      <input #answer type="text" class="form-control" placeholder="Put your answer right there..." [(ngModel)]="answerValue" (keyup.enter)="submit.click()" aria-label="Recipient's username" aria-describedby="button-addon">
+      <div class="input-group-append">
+        <button #submit id="button-addon" class="btn btn-outline-secondary" [ngClass]="{'disabled': userAnswer === 3}" type="button" (click)="onGuess(answer.value)">Guess</button>
+      </div>
+    </div>
+  </div>
+
+  <div [ngSwitch]="userAnswer" class="answer-feedback">
+    <div *ngSwitchCase="0" class="hide"></div>
+    <div *ngSwitchCase="1" class="alert alert-success" role="alert">Yeet! Congratulations!<br/>Correct answers: {{question.answers}}</div>
+    <div *ngSwitchCase="2" class="alert alert-danger" role="alert">Whoops! You are wrong! Try again!</div>
+    <div *ngSwitchCase="3" class="alert alert-info" role="alert">{{question.answers}}</div>
+  </div>
+
+  <div class="d-inline-block quiz-controls">
+    <button type="button" class="btn btn-secondary" (click)="onSkip()">Skip</button>
+    <button type="button" class="btn btn-info" (click)="onSurrender()">Answer</button>
+  </div>
+
+</div>

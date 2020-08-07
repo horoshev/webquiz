@@ -23,7 +23,7 @@ namespace Data.Repositories
                 .RuleFor(x => x.Answers, x => x.Lorem.Words(3).Aggregate((s, w) => $"{s} {w}").Trim())
                 .RuleFor(x => x.CreatedAt, x=> DateTime.Now)
                 .RuleFor(x => x.UpdatedAt, x=> DateTime.Now)
-                .RuleFor(x => x.Author, x => new Author
+                .RuleFor(x => x.Author, x => new User
                 {
                     Email = x.Person.Email,
                     EmailConfirmed = true,

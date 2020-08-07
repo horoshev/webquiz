@@ -1,0 +1,30 @@
+<h3>Create new question</h3>
+
+<form class="form" enctype="multipart/form-data" [formGroup]="questionForm" (ngSubmit)="onSubmit()">
+  <div class="form-label-group">
+    <textarea formControlName="text" name="Question" id="inputQuestion" class="form-control" placeholder="Question" required autofocus></textarea>
+    <label for="inputQuestion" class="text-muted">Question</label>
+  </div>
+
+  <div formArrayName="answers">
+    <div class="input-group form-label-group" *ngFor="let answer of answersFormArray.controls; let i = index; last as isLast">
+      <input [formControlName]="i.toString()" name="Answer" type="text" id="inputAnswer" class="form-control" value="{{answer.value}}" placeholder="Answer" required>
+      <label for="inputAnswer" class="text-muted">Answer</label>
+      <div class="input-group-append">
+        <button *ngIf="isLast else remove" class="btn btn-warning" type="button" (click)="addAnswer()">➕</button>
+        <ng-template #remove>
+          <button class="btn btn-dark" type="button" (click)="removeAnswer(i)">➖</button>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-label-group">
+    <textarea formControlName="explanation" name="Explanation" id="inputExplanation" class="form-control" placeholder="Explanation" required></textarea>
+    <label for="inputExplanation" class="text-muted">Explanation</label>
+  </div>
+
+  <hr class="mb-4">
+
+  <button class="btn btn-primary btn-lg btn-block" type="submit">Create question</button>
+</form>

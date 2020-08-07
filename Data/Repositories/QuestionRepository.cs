@@ -2,6 +2,7 @@
 using System.Linq;
 using Application.Entities;
 using Application.Interfaces;
+using Application.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories
@@ -23,6 +24,16 @@ namespace Data.Repositories
         public Question GetQuestionById(int questionId)
         {
             return _context.Questions.Find(questionId);
+        }
+
+        public Question GetQuestionByIndex(int index)
+        {
+            return _context.Questions.Skip(index).First();
+        }
+
+        public int QuestionsCount()
+        {
+            return _context.Questions.Count();
         }
 
         public void InsertQuestion(Question question)
