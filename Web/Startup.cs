@@ -1,6 +1,9 @@
+using System.Linq;
+using System.Runtime.CompilerServices;
 using Application.Entities;
 using Application.Interfaces;
 using Application.Services;
+using AutoMapper;
 using Data;
 using Data.Repositories;
 using Microsoft.AspNetCore.Authentication;
@@ -14,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Unity;
 using Unity.Lifetime;
+using Web.Common;
 using Config = Web.IdentityServerConfiguration;
 
 namespace Web
@@ -55,6 +59,10 @@ namespace Web
                 // .AddTestUsers(Config.TestUsers)
                 .AddApiAuthorization<User, WebQuizDbContext>();
 
+            services.AddAuthorization(options =>
+                options.AddPolicy(nameof(QuestionPolicy),
+                    policy => policy.Requirements = QuestionPolicy.Requirements));
+
             /*
             services.AddIdentityServer(options =>
                 {
@@ -84,6 +92,8 @@ namespace Web
                 });
             */
 
+            services.AddAutoMapper(typeof(Startup));
+
             services.AddControllersWithViews();
             services.AddRazorPages();
             // In production, the Angular files will be served from this directory
@@ -96,6 +106,7 @@ namespace Web
             container.RegisterType<ISeedRepository, SeedRepository>(TransientLifetimeManager.Instance);
 
             container.RegisterType<IQuestionService, QuestionService>();
+            // container.RegisterType<IMapper, Mapper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,1 +1,32 @@
-<p>profile works!</p>
+<div class="container">
+
+  <h3 class="pb-3 mb-4 border-bottom">Profile</h3>
+
+  <div class="row">
+    <div class="col-3">
+      <div class="nav flex-column nav-pills" *ngFor="let tab of tabs; let i = index;">
+        <a class="nav-link" (click)="showTab(i)" [ngClass]="{'active': selectedTab === i}" routerLink="./{{tab}}">{{tab | titlecase}}</a>
+      </div>
+    </div>
+    <div class="col-9">
+      <div class="tab-content" *ngFor="let tab of tabs; let i = index;">
+        <div class="tab-pane fade " id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">Home</div>
+        <div class="tab-pane fade" [ngClass]="{'show active': selectedTab === i}">
+          <div class="h5">{{tab | titlecase}}</div>
+        </div>
+      </div>
+      <router-outlet></router-outlet>
+
+    </div>
+  </div>
+</div>
+
+<app-dialog #confirmation>
+  <div title>Confirmation</div>
+  <p message>Are you sure you want to delete this question?</p>
+</app-dialog>
+
+<app-dialog #edit>
+  <div title>Edit question</div>
+  <app-question-create message [question]="questionToEdit" (modifiedQuestion)="onModify($event)" [showTitle]="false" [showControls]="false"></app-question-create>
+</app-dialog>

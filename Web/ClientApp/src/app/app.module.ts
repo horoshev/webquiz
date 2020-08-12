@@ -16,6 +16,11 @@ import { QuestionViewComponent } from './question-view/question-view.component';
 import { QuestionRandomComponent } from './question-random/question-random.component';
 import { QuestionCreateComponent } from './question-create/question-create.component';
 import { ProfileComponent } from './profile/profile.component';
+import { QuestionComponent } from './question/question.component';
+import { DialogComponent } from './dialog/dialog.component';
+import { StatsComponent } from './stats/stats.component';
+import { SettingsComponent } from './settings/settings.component';
+import { QuestionListComponent } from './question-list/question-list.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +32,12 @@ import { ProfileComponent } from './profile/profile.component';
     QuestionViewComponent,
     QuestionRandomComponent,
     QuestionCreateComponent,
-    ProfileComponent
+    ProfileComponent,
+    QuestionComponent,
+    DialogComponent,
+    StatsComponent,
+    SettingsComponent,
+    QuestionListComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -39,9 +49,19 @@ import { ProfileComponent } from './profile/profile.component';
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'question', component: QuestionDataComponent },
       { path: 'question/create', component: QuestionCreateComponent },
-      { path: 'question/random', component: QuestionRandomComponent },
       { path: 'question/:id', component: QuestionViewComponent },
-      { path: 'profile/:id', component: ProfileComponent },
+      { path: 'quiz', component: QuestionRandomComponent },
+      {
+        path: 'profile',
+        component: ProfileComponent,
+        children: [
+          {path: '', redirectTo: 'stats', pathMatch: 'full'},
+          {path: 'stats', component: StatsComponent},
+          {path: 'questions', component: QuestionRandomComponent},
+          {path: 'notifications', component: StatsComponent},
+          {path: 'settings', component: SettingsComponent}
+        ]
+      },
       { path: 'fetch-data', component: FetchDataComponent, canActivate: [AuthorizeGuard] },
     ])
   ],

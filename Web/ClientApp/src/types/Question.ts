@@ -1,6 +1,7 @@
 ﻿export interface Question {
-  id: number
+  id?: number
   text: string
-  answers: string
+  answers: string[]
+  explanation: string
   [key: string]: any
 }

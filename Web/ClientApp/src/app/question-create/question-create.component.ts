@@ -1,6 +1,8 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, EventEmitter, Inject, Input, OnInit, Output} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {HttpClient} from "@angular/common/http";
+import {Question} from "../../types/Question";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-question-create',
@@ -9,9 +11,13 @@ import {HttpClient} from "@angular/common/http";
 })
 export class QuestionCreateComponent implements OnInit {
 
+  @Input() showTitle: boolean = true
+  @Input() showControls: boolean = true
+
+  errors: [string, unknown][] = []
   questionForm: FormGroup
 
-  constructor(private fb: FormBuilder, private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {
+  constructor(private fb: FormBuilder, private http: HttpClient, @Inject('BASE_URL') private baseUrl: string, private router: Router) {
     this.questionForm = fb.group({
       text: ['', Validators.required],
       answers: fb.array([fb.control('')]),
@@ -23,8 +29,46 @@ export class QuestionCreateComponent implements OnInit {
     return (<FormArray> this.questionForm.get('answers'));
   }
 
-  ngOnInit() {
+  @Input()
+  set question(question: Question) {
 
+    if (!question) return
+
+    let value = {
+      text: question.text,
+      answers: question.answers,
+      explanation: question.explanation,
+    }
+
+    let answersArray = this.questionForm.get('answers') as FormArray
+    answersArray.clear()
+
+    value.answers.forEach(() => this.addAnswer())
+    this.questionForm.patchValue(value)
+  }
+
+  @Output() modifiedQuestion = new EventEmitter<any>();
+
+  onChange() {
+    this.modifiedQuestion.emit(this.questionForm.value)
+  }
+
+  get tt() {
+
+    let value = this.questionForm.value
+    let quest: Question
+
+    quest = {
+      text: value.text,
+      answers: value.answers.join(' '),
+      explanation: value.explanation
+    }
+
+    return this.questionForm.value
+    return quest
+  }
+
+  ngOnInit() {
   }
 
   createAnswerGroup() {
@@ -40,11 +84,16 @@ export class QuestionCreateComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(this.questionForm.value)
-
     this.http.post(this.baseUrl + 'api/question', this.questionForm.value).subscribe(
-      result => console.log('success'),
-      error => console.log(error)
+      result => this.router.navigate([`/question/${result}`]),
+      error => {
+        console.error(error);
+        this.errors = Object.entries(error.error.errors)
+      }
     )
   }
+}
+
+interface Errors {
+  [key: string]: string
 }

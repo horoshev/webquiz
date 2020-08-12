@@ -1,18 +1,8 @@
-﻿using System.Collections.Generic;
-using Application.Entities;
-using Application.Services;
+﻿using Application.Entities;
 
 namespace Application.Interfaces
 {
-    public interface IQuestionRepository
+    public interface IQuestionRepository : IRepository<Question>
     {
-        IEnumerable<Question> GetQuestions();
-        Question GetQuestionById(int questionId);
-        Question GetQuestionByIndex(int index);
-        int QuestionsCount();
-        void InsertQuestion(Question question);
-        void DeleteQuestion(int questionId);
-        void UpdateQuestion(Question question);
-        void Save();
     }
 }

@@ -1,0 +1,10 @@
+<div class="layout" *ngIf="isOpen">
+  <div class="dialog-container shadow rounded">
+    <div class="h2"><ng-content select="[title]"></ng-content></div>
+    <div><ng-content select="[message]"></ng-content></div>
+    <div class="controls text-right">
+      <button class="btn btn-primary" (click)="confirm()">Ok</button>
+      <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    </div>
+  </div>
+</div>

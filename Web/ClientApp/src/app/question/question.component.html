@@ -1,0 +1,8 @@
+<div class="question-wrapper shadow question-item question-card shadow">
+  <div class="mb-3">
+    <a class="h3 text-dark" routerLink="/question/{{question.id}}">#{{question.id}}</a>
+  </div>
+  <p>{{question.text}}</p>
+  <p *ngIf="openAnswers">{{question.answers}}</p>
+  <ng-content></ng-content>
+</div>

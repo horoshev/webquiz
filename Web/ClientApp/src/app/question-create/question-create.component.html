@@ -1,6 +1,19 @@
-<h3>Create new question</h3>
+<h3 *ngIf="showTitle">Create new question</h3>
+<br/>
+<div *ngIf="errors.length != 0" class="alert alert-danger" role="alert">
+  <p>Whoops! Something went wrong!</p>
+  <ol>
+    <li *ngFor="let item of errors">
+      {{item[0]}}
+      <ul>
+        <li *ngFor="let error of item[1]">{{error | json}}</li>
+      </ul>
+    </li>
+  </ol>
+  Please, try again!
+</div>
 
-<form class="form" enctype="multipart/form-data" [formGroup]="questionForm" (ngSubmit)="onSubmit()">
+<form class="form" enctype="multipart/form-data" [formGroup]="questionForm" (ngSubmit)="onSubmit()" (focusout)="onChange()">
   <div class="form-label-group">
     <textarea formControlName="text" name="Question" id="inputQuestion" class="form-control" placeholder="Question" required autofocus></textarea>
     <label for="inputQuestion" class="text-muted">Question</label>
@@ -24,7 +37,7 @@
     <label for="inputExplanation" class="text-muted">Explanation</label>
   </div>
 
-  <hr class="mb-4">
+  <hr *ngIf="showControls" class="mb-4">
 
-  <button class="btn btn-primary btn-lg btn-block" type="submit">Create question</button>
+  <button *ngIf="showControls" class="btn btn-primary btn-lg btn-block" type="submit">Create question</button>
 </form>

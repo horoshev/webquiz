@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Application.Dto;
 using Application.Entities;
 using Application.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,36 +14,36 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class QuestionController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly IQuestionService _questionService;
-        private readonly ISeedRepository _seedRepository;
         private readonly UserManager<User> _userManager;
 
         public QuestionController(
+            IMapper mapper,
             IQuestionService questionService,
-            ISeedRepository seedRepository,
             UserManager<User> userManager)
         {
+            _mapper = mapper;
             _questionService = questionService;
-            _seedRepository = seedRepository;
             _userManager = userManager;
         }
 
         // TODO: Pagination
         [HttpGet]
-        public IEnumerable<Question> GetQuestions()
+        public IEnumerable<QuestionDto> GetQuestions()
         {
-            return _questionService.GetQuestions();
+            return _mapper.Map<IEnumerable<QuestionDto>>(_questionService.GetAll());
         }
 
         [HttpGet]
         [Route("{questionId}")]
         public IActionResult GetQuestionById(int questionId)
         {
-            var question = _questionService.GetQuestionById(questionId);
+            var question = _questionService.Get(questionId);
 
             if (question is null) return NotFound();
 
-            return Ok(question);
+            return Ok(_mapper.Map<QuestionDto>(question));
         }
 
         [Authorize]
@@ -52,9 +52,10 @@ namespace Web.Controllers
         public IActionResult GetRandomQuestion()
         {
             var question = _questionService.GetRandomQuestion();
+
             if (question is null) return NotFound();
 
-            return Ok(question);
+            return Ok(_mapper.Map<QuestionDto>(question));
         }
 
         [Authorize]
@@ -72,68 +73,47 @@ namespace Web.Controllers
         }
 
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> InsertQuestion(QuestionRequest questionRequest)
+        [HttpGet]
+        [Route("author")]
+        public IEnumerable<QuestionDto> GetAuthorQuestions()
         {
             var id = User.GetSubjectIdentifier();
-            var author = await _userManager.FindByIdAsync(id);
 
-            if (questionRequest is null || author is null) return BadRequest();
+            var questions = _questionService.GetQuestionByAuthorId(id);
 
-            var question = new Question
-            {
-                Text = questionRequest.Text,
-                Answers = questionRequest.Answers.Aggregate((s, i) => $"{s} {i}").Trim(),
-                Explanation = questionRequest.Explanation,
-                Author = author
-            };
-
-            _questionService.InsertQuestion(question);
-            _questionService.Save();
-
-            string.IsNullOrEmpty("ds");
-            "ds".Contains('X');
-
-            return Ok();
-        }
-
-        [HttpPost]
-        [Route("{count}")]
-        public IActionResult GenerateQuestions(int count)
-        {
-            _seedRepository.GenerateQuestions(count);
-
-            return Ok();
+            return _mapper.Map<IEnumerable<QuestionDto>>(questions);
         }
 
         [Authorize]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteQuestion(int questionId)
+        [HttpPost]
+        public IActionResult InsertQuestion(QuestionDto question)
         {
-            var author = await _userManager.FindByIdAsync(User.GetSubjectIdentifier() ?? "");
-            var question = _questionService.GetQuestionById(questionId);
+            var createdQuestion = _questionService.Create(question);
 
-            if (question is null || author is null) return BadRequest();
-            if (question.Author.Id != author.Id) return Forbid(); // you can`t delete other people questions
+            if (createdQuestion is null) return BadRequest();
 
-            _questionService.DeleteQuestion(questionId);
+            return Ok(createdQuestion.Id.ToString());
+        }
+
+        [Authorize(nameof(QuestionPolicy))]
+        [HttpDelete]
+        [Route("{questionId}")]
+        public IActionResult DeleteQuestion(int questionId)
+        {
+            var deletedQuestion = _questionService.Delete(questionId);
+
+            if (deletedQuestion is null) return BadRequest();
 
             return NoContent();
         }
 
-        [Authorize]
+        [Authorize(nameof(QuestionPolicy))]
         [HttpPut]
-        public async Task<IActionResult> UpdateQuestion(Question question)
+        public IActionResult UpdateQuestion(QuestionDto question)
         {
-            var author = await _userManager.FindByIdAsync(User.GetSubjectIdentifier() ?? "");
-            if (question is null || author is null) return BadRequest();
+            var updatedQuestion = _questionService.Update(question);
 
-            var originalQuestion = _questionService.GetQuestionById(question.Id);
-            if (originalQuestion is null) return NotFound();
-
-            if (question.Author.Id != author.Id) return Forbid(); // you can`t modify other people questions
-
-            _questionService.UpdateQuestion(question);
+            if (updatedQuestion is null) return BadRequest();
 
             return NoContent();
         }

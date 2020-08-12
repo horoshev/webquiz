@@ -33,7 +33,7 @@ namespace Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2020, 8, 6, 15, 35, 0, 686, DateTimeKind.Local).AddTicks(9136));
+                        .HasDefaultValue(new DateTime(2020, 8, 9, 21, 54, 58, 227, DateTimeKind.Local).AddTicks(1142));
 
                     b.Property<string>("Explanation")
                         .HasColumnType("TEXT");
@@ -45,7 +45,7 @@ namespace Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2020, 8, 6, 15, 35, 0, 689, DateTimeKind.Local).AddTicks(2067));
+                        .HasDefaultValue(new DateTime(2020, 8, 9, 21, 54, 58, 230, DateTimeKind.Local).AddTicks(716));
 
                     b.HasKey("Id");
 

@@ -198,8 +198,8 @@ namespace Data.Migrations
                     Explanation = table.Column<string>(nullable: true),
                     Answers = table.Column<string>(nullable: false),
                     AuthorId = table.Column<string>(nullable: false),
-                    CreatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 6, 15, 35, 0, 686, DateTimeKind.Local).AddTicks(9136)),
-                    UpdatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 6, 15, 35, 0, 689, DateTimeKind.Local).AddTicks(2067))
+                    CreatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 9, 21, 54, 58, 227, DateTimeKind.Local).AddTicks(1142)),
+                    UpdatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 9, 21, 54, 58, 230, DateTimeKind.Local).AddTicks(716))
                 },
                 constraints: table =>
                 {

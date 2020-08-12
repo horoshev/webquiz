@@ -35,7 +35,7 @@ export class QuestionRandomComponent implements OnInit {
   onGuess(guess: string) {
     if (!guess || this.userAnswer === QuestionAnswer.Surrender) return
 
-    this.userAnswer = this.question.answers.split(' ')
+    this.userAnswer = this.question.answers
       .includes(guess) ? QuestionAnswer.Correct : QuestionAnswer.Wrong;
 
     if (this.userAnswer === QuestionAnswer.Wrong)

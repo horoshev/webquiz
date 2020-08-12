@@ -1,0 +1,9 @@
+<div class="question-list">
+  <app-question *ngFor="let question of questions"
+                [question]="question"
+                [openAnswers]="true"
+                [openControls]="true"
+  >
+    <ng-content></ng-content>
+  </app-question>
+</div>
