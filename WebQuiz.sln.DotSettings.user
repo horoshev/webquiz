@@ -3,12 +3,10 @@
   &lt;Assembly Path="C:\Users\artem\.nuget\packages\identityserver4.entityframework.storage\3.0.0\lib\netstandard2.1\IdentityServer4.EntityFramework.Storage.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\artem\.nuget\packages\moq\4.14.5\lib\netstandard2.0\Moq.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2597636e_002D8dde_002D41b9_002D869b_002D4f079a5a4974/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Forward" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::DA752092-C227-4F9B-AE57-2132489AA563::.NETCoreApp,Version=v3.1::Tests.Web.AutoMapper.AutoMapperTests.Forward&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::DA752092-C227-4F9B-AE57-2132489AA563::.NETCoreApp,Version=v3.1::Tests.Web.AutoMapper.AutoMapperTests.Reverse&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c07b1a0e_002D88d8_002D4800_002Da2e4_002D25b1e0a3dd0e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="D:\dev\WebQuiz" Presentation="&amp;lt;Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
 	
 	
 	</wpf:ResourceDictionary>

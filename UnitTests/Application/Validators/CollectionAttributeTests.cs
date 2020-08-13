@@ -62,22 +62,29 @@ namespace Tests.Application.Validators
             new object[] {L2E2Collection, nameof(TestClass.ML2MEL2)}
         };
 
-        public object[] InvalidMinElementLengthCases = {
+        public static object[] InvalidMinElementLengthCases = {
             new object[] {EmptyCollection, nameof(TestClass.ML0MEL0)},
 
-            new object[] {L1E2Collection, nameof(TestClass.ML0MEL2)},
+            new object[] {L1E0Collection, nameof(TestClass.ML0MEL2)},
+            new object[] {L2E0Collection, nameof(TestClass.ML0MEL2)},
+            new object[] {L1E1Collection, nameof(TestClass.ML0MEL2)},
+            new object[] {L2E1Collection, nameof(TestClass.ML0MEL2)},
 
-            new object[] {L2E0Collection, nameof(TestClass.ML2MEL0)},
-
+            new object[] {L2E0Collection, nameof(TestClass.ML2MEL2)},
             new object[] {L2E2Collection, nameof(TestClass.ML2MEL2)}
         };
 
-        public object[] ValidMinElementLengthCases = {
+        public static object[] ValidMinElementLengthCases = {
             new object[] {EmptyCollection, nameof(TestClass.ML0MEL0)},
+            new object[] {L1E0Collection, nameof(TestClass.ML0MEL0)},
+            new object[] {L2E0Collection, nameof(TestClass.ML0MEL0)},
 
             new object[] {L1E2Collection, nameof(TestClass.ML0MEL2)},
+            new object[] {L2E2Collection, nameof(TestClass.ML0MEL2)},
 
             new object[] {L2E0Collection, nameof(TestClass.ML2MEL0)},
+            new object[] {L2E1Collection, nameof(TestClass.ML2MEL0)},
+            new object[] {L2E2Collection, nameof(TestClass.ML2MEL0)},
 
             new object[] {L2E2Collection, nameof(TestClass.ML2MEL2)}
         };
@@ -97,7 +104,7 @@ namespace Tests.Application.Validators
             Assert.Throws<ValidationException>(() => Validate(testValue, collectionName));
         }
 
-        [Test, TestCaseSource(nameof(InvalidMinLengthCases))]
+        [Test, TestCaseSource(nameof(InvalidMinElementLengthCases))]
         public void CollectionElementLengthLessThanMinElementLengthTest(ICollection<string> testValue, string collectionName)
         {
             Assert.Throws<ValidationException>(() => Validate(testValue, collectionName));
@@ -109,13 +116,13 @@ namespace Tests.Application.Validators
             Assert.DoesNotThrow(() => Validate(testValue, collectionName));
         }
 
-        [Test, TestCaseSource(nameof(InvalidMinLengthCases))]
+        [Test, TestCaseSource(nameof(ValidMinElementLengthCases))]
         public void CollectionElementLengthGreaterThanMinElementLengthTest(ICollection<string> testValue, string collectionName)
         {
             Assert.DoesNotThrow(() => Validate(testValue, collectionName));
         }
 
-        public void Validate(ICollection<string> testValue, string collectionName)
+        private static void Validate(ICollection<string> testValue, string collectionName)
         {
             var testType = typeof(TestClass)
                 .GetProperty(collectionName)?
