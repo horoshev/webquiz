@@ -63,7 +63,6 @@ namespace Tests.Application.Validators
         };
 
         public static object[] InvalidMinElementLengthCases = {
-            new object[] {EmptyCollection, nameof(TestClass.ML0MEL0)},
 
             new object[] {L1E0Collection, nameof(TestClass.ML0MEL2)},
             new object[] {L2E0Collection, nameof(TestClass.ML0MEL2)},
@@ -71,7 +70,7 @@ namespace Tests.Application.Validators
             new object[] {L2E1Collection, nameof(TestClass.ML0MEL2)},
 
             new object[] {L2E0Collection, nameof(TestClass.ML2MEL2)},
-            new object[] {L2E2Collection, nameof(TestClass.ML2MEL2)}
+            new object[] {L2E1Collection, nameof(TestClass.ML2MEL2)}
         };
 
         public static object[] ValidMinElementLengthCases = {
