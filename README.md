@@ -1,4 +1,6 @@
-## Project Web Quiz
+## Project Web Quiz 
+
+![.NET Core](https://github.com/horoshev/webquiz/workflows/.NET%20Core/badge.svg)
 
 ##### 1. N-tire architecture
 - [x] Layers: Application/Data/Web
@@ -8,7 +10,7 @@
 - [x] Unity container 
 - [x] Lifetime management
 - [x] MVC dependency resolving
-- [ ] WebAPI dependency resolving
+- [x] WebAPI dependency resolving
 
 ##### 4. Entity Framework 
 - [x] Basics (DB Context, Code First)
@@ -22,17 +24,17 @@
 
 ##### 6. DTO objects, mapping 
 - [x] POCO/DTO objects
-- [ ] Automapper
+- [x] AutoMapper
 
 ##### 7. ASP.NET Identity 2.0 
 - [ ] User/Role Managers
-- [ ] Identity claims
+- [x] Identity claims
 
 ##### 8. Deployment 
-- [ ] Publishing
+- [x] Publishing
 - [ ] IIS configuration
 - [ ] Web deploy
 
 ##### 9. Testing, logging, exception handling 
-- [ ] Unit tests (NUnit)
+- [x] Unit tests (NUnit)
 - [ ] Logging (Common.Logger + NLog)
