@@ -14,12 +14,46 @@
 </div>
 
 <form class="form" enctype="multipart/form-data" [formGroup]="questionForm" (ngSubmit)="onSubmit()" (focusout)="onChange()">
+
   <div class="form-label-group">
-    <textarea formControlName="text" name="Question" id="inputQuestion" class="form-control" placeholder="Question" required autofocus></textarea>
+    <input id="questionType" name="type" type="number" [formControlName]="'type'" [(ngModel)]="+typeSelect.value" hidden>
+    <select #typeSelect class="custom-select form-control">
+      <option class="text-muted" value="-1" disabled selected>Type</option>
+      <option *ngFor="let option of typeOptions" [value]="option.value">{{option.label}}</option>
+    </select>
+    <label for="questionType" class="select-label">
+<!--      Type-->
+    </label>
+  </div>
+
+  <div class="form-label-group">
+    <input [formControlName]="'difficulty'" type="number" [(ngModel)]="+difficultySelect.value" hidden>
+    <select #difficultySelect name="QuestionDifficulty" id="questionDifficulty" class="custom-select form-control">
+      <option class="text-muted" value="-1" disabled selected>Difficulty</option>
+      <option *ngFor="let option of difficultyOptions" [value]="option.value">{{option.label}}</option>
+    </select>
+    <label for="questionDifficulty" class="select-label">
+<!--      Difficulty-->
+    </label>
+  </div>
+
+  <div class="form-label-group">
+    <input [formControlName]="'category'" type="number" [(ngModel)]="+categorySelect.value" hidden>
+    <select #categorySelect name="QuestionCategory" id="questionCategory" class="custom-select form-control">
+      <option class="text-muted" value="-1" disabled selected>Category</option>
+      <option *ngFor="let option of categoryOptions" [value]="option.value">{{option.label}}</option>
+    </select>
+    <label for="questionCategory" class="select-label">
+<!--      Category-->
+    </label>
+  </div>
+
+  <div class="form-label-group">
+    <textarea [formControlName]="'text'" name="Question" id="inputQuestion" class="form-control" placeholder="Question" required autofocus></textarea>
     <label for="inputQuestion" class="text-muted">Question</label>
   </div>
 
-  <div formArrayName="answers">
+  <div formArrayName="correctAnswers">
     <div class="input-group form-label-group" *ngFor="let answer of answersFormArray.controls; let i = index; last as isLast">
       <input [formControlName]="i.toString()" name="Answer" type="text" id="inputAnswer" class="form-control" value="{{answer.value}}" placeholder="Answer" required>
       <label for="inputAnswer" class="text-muted">Answer</label>
@@ -33,11 +67,11 @@
   </div>
 
   <div class="form-label-group">
-    <textarea formControlName="explanation" name="Explanation" id="inputExplanation" class="form-control" placeholder="Explanation" required></textarea>
+    <textarea [formControlName]="'explanation'" name="Explanation" id="inputExplanation" class="form-control" placeholder="Explanation" required></textarea>
     <label for="inputExplanation" class="text-muted">Explanation</label>
   </div>
 
   <hr *ngIf="showControls" class="mb-4">
 
-  <button *ngIf="showControls" class="btn btn-primary btn-lg btn-block" type="submit">Create question</button>
+  <button *ngIf="showControls" class="btn btn-primary btn-lg btn-block" type="submit" [disabled]="!questionForm.valid">Create question</button>
 </form>

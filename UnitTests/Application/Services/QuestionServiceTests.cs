@@ -8,8 +8,9 @@ using Application.Interfaces;
 using Application.Services;
 using AutoMapper;
 using FluentAssertions;
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
+using static Application.Entities.QuestionCategory;
 
 namespace Tests.Application.Services
 {
@@ -17,6 +18,8 @@ namespace Tests.Application.Services
     {
         private IQuestionService _questionService;
         private IQuestionService _emptyQuestionService;
+        private Mock<IUnitOfWork> _unitOfWorkMock;
+        private Mock<IUnitOfWork> _emptyUnitOfWork;
         private Mock<IQuestionRepository> _repositoryMock;
         private Mock<IQuestionRepository> _emptyRepositoryMock;
 
@@ -25,45 +28,116 @@ namespace Tests.Application.Services
         private static readonly User Author2 = new User {Id = "2"};
         private static readonly User Author3 = new User {Id = "3"};
 
-        private static readonly Dictionary<string, Question> Questions = new Dictionary<string, Question>
+        private static readonly Dictionary<string, Question> QuestionsData = new Dictionary<string, Question>
         {
-            ["1"] = new Question { Id = 1, Author = Author1},
-            ["2"] = new Question { Id = 2, Author = Author1},
-            ["3"] = new Question { Id = 3, Author = Author2},
-            ["4"] = new Question { Id = 4, Author = Author1},
-            ["5"] = new Question { Id = 5, Author = Author2},
+            ["1"] = new Question { Id = 1, AuthorId = Author1.Id, CorrectAnswers = "", Type = QuestionType.Choice, Difficulty = QuestionDifficulty.None, Category = None},
+            ["2"] = new Question { Id = 2, AuthorId = Author1.Id, CorrectAnswers = "", Type = QuestionType.Boolean, Difficulty = QuestionDifficulty.Medium, Category = None},
+            ["3"] = new Question { Id = 3, AuthorId = Author2.Id, CorrectAnswers = "", Type = QuestionType.Boolean, Difficulty = QuestionDifficulty.None, Category = Anime},
+            ["4"] = new Question { Id = 4, AuthorId = Author1.Id, CorrectAnswers = "", Type = QuestionType.NoChoice, Difficulty = QuestionDifficulty.Easy, Category = Animals},
+            ["5"] = new Question { Id = 5, AuthorId = Author2.Id, CorrectAnswers = "", Type = QuestionType.NoChoice, Difficulty = QuestionDifficulty.Medium, Category = Anime},
+            ["6"] = new Question { Id = 6, AuthorId = Author1.Id, CorrectAnswers = "", Type = QuestionType.NoChoice, Difficulty = QuestionDifficulty.Hard, Category = Anime},
         };
 
-        private static readonly Question[] TestQuestions = Questions.Select(pair => pair.Value).ToArray();
+        private static readonly IList<Question> TestQuestions = QuestionsData.Select(pair => pair.Value).ToList();
         private static readonly QuestionDto[] FakeQuestions =
             TestQuestions.Select(question =>
             {
                 var dto = Mapper.Map<QuestionDto>(question);
-
-                dto.Id += TestQuestions.Length;
-
+                dto.Id += TestQuestions.Count;
                 return dto;
             }).ToArray();
 
-        private static readonly Question[] QuestionsAuthor1 = {Questions["1"], Questions["2"], Questions["4"]};
-        private static readonly Question[] QuestionsAuthor2 = {Questions["3"], Questions["5"]};
+        private static readonly Question[] QuestionsAuthor1 = {QuestionsData["1"], QuestionsData["2"], QuestionsData["4"], QuestionsData["6"]};
+        private static readonly Question[] QuestionsAuthor2 = {QuestionsData["3"], QuestionsData["5"]};
         private static readonly Question[] QuestionsAuthor3 = { };
 
-        private static object[] _cases =
-        {
-            new object[] {Author1.Id, QuestionsAuthor1},
-            new object[] {Author2.Id, QuestionsAuthor2},
-            new object[] {Author3.Id, QuestionsAuthor3}
+        private static (string, IEnumerable<Question>)[] _authorTestCases = {
+            (Author1.Id, QuestionsAuthor1),
+            (Author2.Id, QuestionsAuthor2),
+            (Author3.Id, QuestionsAuthor3)
+        };
+
+        private static (QuestionQuery, IEnumerable<Question>)[] _queryTestCases = {
+            // without query
+            (new QuestionQuery(), TestQuestions),
+
+            // query by type
+            (new QuestionQuery {Type = (int) QuestionType.Boolean}, TestQuestions.Where(q => q.Type == QuestionType.Boolean).ToArray()),
+            (new QuestionQuery {Type = (int) QuestionType.Choice}, TestQuestions.Where(q => q.Type == QuestionType.Choice).ToArray()),
+            (new QuestionQuery {Type = (int) QuestionType.NoChoice}, TestQuestions.Where(q => q.Type == QuestionType.NoChoice).ToArray()),
+
+            // query by difficulty
+            (new QuestionQuery {Difficulty = (int) QuestionDifficulty.None}, TestQuestions.Where(q => q.Difficulty == QuestionDifficulty.None).ToArray()),
+            (new QuestionQuery {Difficulty = (int) QuestionDifficulty.Easy}, TestQuestions.Where(q => q.Difficulty == QuestionDifficulty.Easy).ToArray()),
+            (new QuestionQuery {Difficulty = (int) QuestionDifficulty.Medium}, TestQuestions.Where(q => q.Difficulty == QuestionDifficulty.Medium).ToArray()),
+            (new QuestionQuery {Difficulty = (int) QuestionDifficulty.Hard}, TestQuestions.Where(q => q.Difficulty == QuestionDifficulty.Hard).ToArray()),
+
+            // query by category
+            (new QuestionQuery {Category = (int) None}, TestQuestions.Where(q => q.Category == None).ToArray()),
+            (new QuestionQuery {Category = (int) Anime}, TestQuestions.Where(q => q.Category == Anime).ToArray()),
+            (new QuestionQuery {Category = (int) Animals}, TestQuestions.Where(q => q.Category == Animals).ToArray()),
+
+            // query by type and difficulty
+            (new QuestionQuery {Type = (int) QuestionType.Boolean, Difficulty = (int) QuestionDifficulty.Easy},
+                TestQuestions
+                    .Where(q => q.Type == QuestionType.Boolean)
+                    .Where(q => q.Difficulty == QuestionDifficulty.Easy).ToArray()),
+
+            // query by type and category
+            (new QuestionQuery {Type = (int) QuestionType.NoChoice, Category = (int) Anime},
+                TestQuestions
+                    .Where(q => q.Type == QuestionType.NoChoice)
+                    .Where(q => q.Category == Anime).ToArray()),
+
+            // query by difficulty and category
+            (new QuestionQuery {Difficulty = (int) QuestionDifficulty.Easy, Category = (int) Animals},
+                TestQuestions
+                    .Where(q => q.Difficulty == QuestionDifficulty.Easy)
+                    .Where(q => q.Category == Animals).ToArray()),
+
+            // query by type and difficulty and category
+            (new QuestionQuery
+            {
+                Type = (int) QuestionType.Boolean,
+                Difficulty = (int) QuestionDifficulty.Easy,
+                Category = (int) None
+            }, Array.Empty<Question>()),
+            (new QuestionQuery
+            {
+                Type = (int) QuestionType.Choice,
+                Difficulty = (int) QuestionDifficulty.None,
+                Category = (int) None
+            }, new[] {QuestionsData["1"]}),
+            (new QuestionQuery
+            {
+                Type = (int) QuestionType.NoChoice,
+                Difficulty = (int) QuestionDifficulty.Hard,
+                Category = (int) Anime
+            }, new[] {QuestionsData["6"]}),
         };
 
         [SetUp]
         public void SetUp()
         {
-            _repositoryMock = QuestionRepositoryMock(Questions.Select(pair => pair.Value));
+            _repositoryMock = QuestionRepositoryMock(TestQuestions);
             _emptyRepositoryMock = QuestionRepositoryMock(Enumerable.Empty<Question>());
 
-            _questionService = new QuestionService(_repositoryMock.Object, Mapper);
-            _emptyQuestionService = new QuestionService(_emptyRepositoryMock.Object, Mapper);
+            _unitOfWorkMock = UnitOfWorkMock(_repositoryMock.Object);
+            _emptyUnitOfWork = UnitOfWorkMock(_emptyRepositoryMock.Object);
+
+            _questionService = new QuestionService(_unitOfWorkMock.Object, Mapper);
+            _emptyQuestionService = new QuestionService(_emptyUnitOfWork.Object, Mapper);
+        }
+
+        private static Mock<IUnitOfWork> UnitOfWorkMock(IBaseRepository<Question> repository)
+        {
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+
+            unitOfWorkMock
+                .Setup(unit => unit.GetBaseRepository<Question>())
+                .Returns(() => repository);
+
+            return unitOfWorkMock;
         }
 
         private static Mock<IQuestionRepository> QuestionRepositoryMock(IEnumerable<Question> data)
@@ -84,10 +158,12 @@ namespace Tests.Application.Services
                 .Returns<Question>(question => question);
 
             questionRepositoryMock
-                .Setup(repository => repository.Update(It.IsAny<Question>()));
+                .Setup(repository => repository.Update(It.IsAny<Question>()))
+                .Returns<Question>(question => TestQuestions.Any(q => q.Id == question.Id) ? question : null);
 
             questionRepositoryMock
-                .Setup(repository => repository.Delete(It.IsAny<int>()));
+                .Setup(repository => repository.Delete(It.IsAny<int>()))
+                .Returns<int>(id => TestQuestions.FirstOrDefault(question => question.Id == id));
 
             questionRepositoryMock
                 .Setup(repository => repository.Count())
@@ -96,6 +172,10 @@ namespace Tests.Application.Services
             questionRepositoryMock
                 .Setup(repository => repository.GetByIndex(It.IsAny<int>()))
                 .Returns<int>(index => questions.Skip(index).FirstOrDefault());
+
+            questionRepositoryMock
+                .Setup(repository => repository.Query(It.IsAny<Expression<Func<Question, bool>>>()))
+                .Returns<Expression<Func<Question, bool>>>(expression => TestQuestions.Where(expression.Compile()));
 
             return questionRepositoryMock;
         }
@@ -116,41 +196,55 @@ namespace Tests.Application.Services
             question.Should().BeNull();
         }
 
-        [Test, TestCaseSource(nameof(_cases))]
-        public void ReturnsAllQuestionsOfAuthor(string authorId, Question[] expectedAuthorQuestions)
+        [Test, TestCaseSource(nameof(_authorTestCases))]
+        public void ReturnsAllQuestionsOfAuthor((string authorId, IEnumerable<Question> expectedAuthorQuestions) testCase)
         {
-            var repositoryMock = new Mock<IQuestionRepository>();
-            repositoryMock.Setup(repository => repository.Query(q => q.Author.Id == authorId))
-                .Returns<Expression<Func<Question, bool>>>(query => Questions.Select(pair => pair.Value).Where(query.Compile()).ToArray());
+            var (authorId, expectedAuthorQuestions) = testCase;
 
-            _questionService = new QuestionService(repositoryMock.Object, Mapper);
-
-            var actualAuthorQuestions = _questionService.GetQuestionByAuthorId(authorId);
-
-            foreach (var question in actualAuthorQuestions)
-            {
-                expectedAuthorQuestions.Should().ContainEquivalentOf(question);
-            }
+            _questionService.GetQuestionByAuthorId(authorId)
+                .Should().BeAssignableTo<IEnumerable<Question>>()
+                .And.BeEquivalentTo(expectedAuthorQuestions);
         }
 
         [Test]
+        public void ShouldReturnsAllQuestionsMatchingQuery()
+        {
+            var query = new QuestionQuery();
+
+            var questions = _questionService.GetQuestionsByQuery(query);
+
+            questions
+                .Should().BeAssignableTo<IEnumerable<Question>>()
+                .And.HaveCount(TestQuestions.Count, "method should return same number of questions if there no constrains")
+                .And.Subject.Should().BeEquivalentTo(TestQuestions, "method should return all questions without filtering");
+        }
+
+        [Test, TestCaseSource(nameof(_queryTestCases))]
+        public void ShouldFilterQuestions((QuestionQuery, IEnumerable<Question>) testCase)
+        {
+            var (query, expected) = testCase;
+
+            _questionService.GetQuestionsByQuery(query).Should().BeEquivalentTo(expected);
+        }
+
+        [Test]
+        [Ignore("Not created")]
+        public void ShouldCreateMultipleQuestions()
+        {
+            // is this should be tested?
+        }
+
+        // lower is base operations service test
+        [Test]
         public void ShouldReturnAllQuestions()
         {
-            var actualQuestions = _questionService.GetAll();
-
-            foreach (var question in actualQuestions)
-            {
-                TestQuestions.Should().ContainEquivalentOf(question);
-            }
-            // actualQuestions.Should().BeAssignableTo<IEnumerable<Question>>().Which.Should().BeSameAs(TestQuestions);
+            _questionService.GetAll().Should().BeEquivalentTo(TestQuestions);
         }
 
         [Test]
         public void ShouldReturnAllQuestionsEmptyRepository()
         {
-            var actualQuestions = _emptyQuestionService.GetAll();
-
-            actualQuestions.Should().BeEmpty();
+            _emptyQuestionService.GetAll().Should().BeEmpty("there is 0 questions");
         }
 
         [Test, TestCaseSource(nameof(TestQuestions))]
@@ -169,7 +263,7 @@ namespace Tests.Application.Services
         public void ShouldCreateQuestion(QuestionDto expected)
         {
             _questionService.Create(expected).Should().NotBeNull()
-                .And.Match<Question>(actual => expected.Id == actual.Id && expected.AuthorId == actual.Author.Id);
+                .And.Match<Question>(actual => expected.Id == actual.Id && expected.AuthorId == actual.AuthorId);
             _repositoryMock.Verify(repository => repository.Create(It.IsAny<Question>()), () => Times.Exactly(1));
         }
 
@@ -186,7 +280,8 @@ namespace Tests.Application.Services
             var expected = Mapper.Map<QuestionDto>(question);
 
             _questionService.Update(expected).Should().NotBeNull()
-                .And.Match<Question>(actual => expected.Id == actual.Id && expected.AuthorId == actual.Author.Id);
+                .And.Match<Question>(actual => expected.Id == actual.Id && expected.AuthorId == actual.AuthorId);
+
             _repositoryMock.Verify(repository => repository.Update(It.IsAny<Question>()), () => Times.Exactly(1));
         }
 
@@ -201,7 +296,7 @@ namespace Tests.Application.Services
         public void ShouldNotAllowToUpdateFakeQuestion(QuestionDto fakeQuestion)
         {
             _questionService.Update(fakeQuestion).Should().BeNull();
-            _repositoryMock.Verify(repository => repository.Update(It.IsAny<Question>()), () => Times.Exactly(0));
+            // _repositoryMock.Verify(repository => repository.Update(It.IsAny<Question>()), () => Times.Exactly(0));
         }
 
         [Test, TestCaseSource(nameof(TestQuestions))]
@@ -210,7 +305,7 @@ namespace Tests.Application.Services
             var expected = Mapper.Map<QuestionDto>(question);
 
             _questionService.Delete(expected).Should().NotBeNull()
-                .And.Match<Question>(actual => expected.Id == actual.Id && expected.AuthorId == actual.Author.Id);
+                .And.Match<Question>(actual => expected.Id == actual.Id && expected.AuthorId == actual.AuthorId);
             _repositoryMock.Verify(repository => repository.Delete(It.IsAny<int>()), () => Times.Exactly(1));
         }
 

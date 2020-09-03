@@ -1,0 +1,12 @@
+.filter-wrapper  {
+  padding: 2rem;
+  border-radius: .5rem;
+}
+
+.d-flex > .custom-select {
+  margin: 0 1rem;
+}
+
+.select-label {
+  font-weight: 500;
+}

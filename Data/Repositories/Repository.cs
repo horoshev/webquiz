@@ -8,15 +8,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories
 {
-    public class Repository<T> : CrudRepository<T>, IRepository<T> where T : class
+    public class Repository<T> : IRepository<T> where T : class, IRepositoryEntity
     {
-        protected Repository(DbContext context) : base(context)
+        protected readonly DbContext Context;
+        protected readonly DbSet<T> Entities;
+
+        public Repository(DbContext context)
         {
+            Context = context;
+            Entities = Context.Set<T>();
         }
 
         public IEnumerable<T> Query(Expression<Func<T, bool>> predicate)
         {
-            return Entities.Where(predicate).ToList();
+            using (Context)
+            {
+                return Entities.Where(predicate).ToList();
+            }
         }
 
         public T GetByIndex(int entityIndex)
@@ -26,9 +34,10 @@ namespace Data.Repositories
 
         public void SaveChanges()
         {
-            Context.SaveChanges();
+            Context?.SaveChanges();
         }
 
+        // TODO: Delete unused
         public async Task SaveChangesAsync()
         {
             await Context.SaveChangesAsync();

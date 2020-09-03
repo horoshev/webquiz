@@ -2,6 +2,13 @@
 
   <h3 class="pb-3 mb-4 border-bottom">Profile</h3>
 
+  <div class="pb-3 mb-4 border-bottom">
+    <div class="h4 mb-3">Secret admin panel</div>
+    <div>
+      <button class="btn btn-success" (click)="onGenerate()">Generate questions</button>
+    </div>
+  </div>
+
   <div class="row">
     <div class="col-3">
       <div class="nav flex-column nav-pills" *ngFor="let tab of tabs; let i = index;">

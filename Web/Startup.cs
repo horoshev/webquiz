@@ -1,11 +1,8 @@
-using System.Linq;
-using System.Runtime.CompilerServices;
 using Application.Entities;
 using Application.Interfaces;
 using Application.Services;
 using AutoMapper;
 using Data;
-using Data.Repositories;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,14 +31,10 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<WebQuizDbContext>(builder =>
-                builder.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            ConfigureDatabase(services);
 
             services.AddDefaultIdentity<User>(options =>
                 {
-                    // options.ClaimsIdentity.UserIdClaimType = JwtClaimTypes.Subject; // ClaimTypes.NameIdentifier;
-                    // options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
-
                     options.User.RequireUniqueEmail = true;
 
                     options.Password.RequireDigit = false;
@@ -56,42 +49,16 @@ namespace Web
                 .AddDefaultTokenProviders();
 
             services.AddIdentityServer()
-                // .AddTestUsers(Config.TestUsers)
                 .AddApiAuthorization<User, WebQuizDbContext>();
 
             services.AddAuthorization(options =>
                 options.AddPolicy(nameof(QuestionPolicy),
                     policy => policy.Requirements = QuestionPolicy.Requirements));
 
-            /*
-            services.AddIdentityServer(options =>
-                {
-                    options.Events.RaiseErrorEvents = true;
-                    options.Events.RaiseInformationEvents = true;
-                    options.Events.RaiseFailureEvents = true;
-                    options.Events.RaiseSuccessEvents = true;
-
-                    // see https://identityserver4.readthedocs.io/en/latest/topics/resources.html
-                    // options.EmitStaticAudienceClaim = true;
-                })
-                .AddInMemoryIdentityResources(Config.IdentityResources)
-                // .AddInMemoryApiScopes(Config.ApiScopes)
-                .AddInMemoryClients(Config.Clients)
-                .AddAspNetIdentity<User>();
-            */
-
             services.AddAuthentication()
                 .AddIdentityServerJwt();
 
-            /*
-            services.Configure<JwtBearerOptions>(
-                IdentityServerJwtConstants.IdentityServerJwtBearerScheme,
-                options =>
-                {
-                    options.Configuration = new OpenIdConnectConfiguration{}; 
-                });
-            */
-
+            services.AddMetrics();
             services.AddAutoMapper(typeof(Startup));
 
             services.AddControllersWithViews();
@@ -100,19 +67,22 @@ namespace Web
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/dist"; });
         }
 
+        protected virtual void ConfigureDatabase(IServiceCollection services)
+        {
+            services.AddDbContext<WebQuizDbContext>(builder =>
+                builder.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+        }
+
         public void ConfigureContainer(IUnityContainer container)
         {
-            container.RegisterType<IQuestionRepository, QuestionRepository>(TransientLifetimeManager.Instance);
-            container.RegisterType<ISeedRepository, SeedRepository>(TransientLifetimeManager.Instance);
-
-            container.RegisterType<IQuestionService, QuestionService>();
-            // container.RegisterType<IMapper, Mapper>();
+            container.RegisterType<IUnitOfWork, UnitOfWork>(TransientLifetimeManager.Instance);
+            container.RegisterType<IQuestionService, QuestionService>(TransientLifetimeManager.Instance);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (env.IsDevelopment() || env.IsEnvironment("Testing"))
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
@@ -120,7 +90,6 @@ namespace Web
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -136,6 +105,9 @@ namespace Web
             app.UseAuthentication();
             app.UseIdentityServer();
             app.UseAuthorization();
+
+            // app.UseAuthor();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -143,6 +115,8 @@ namespace Web
                     "{controller}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+            if (env.IsEnvironment("Testing")) return;
 
             app.UseSpa(spa =>
             {

@@ -1,4 +1,7 @@
-﻿using Application.Interfaces;
+﻿using System.Threading.Tasks;
+using Application.Interfaces;
+using Application.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers
@@ -7,20 +10,24 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class SeedController : ControllerBase
     {
-        private readonly ISeedRepository _seedRepository;
+        private readonly TriviaQuestionService _trivia = new TriviaQuestionService();
+        private readonly IQuestionService _questionService;
+        private readonly IMapper _mapper;
 
-        public SeedController(ISeedRepository seedRepository)
+        public SeedController(IQuestionService questionService, IMapper mapper)
         {
-            _seedRepository = seedRepository;
+            _questionService = questionService;
+            _mapper = mapper;
         }
 
         [HttpPost]
         [Route("{count}")]
-        public IActionResult GenerateQuestions(int count)
+        public async Task<IActionResult> GenerateQuestions(int count)
         {
-            _seedRepository.GenerateQuestions(count);
+            var questions = await _trivia.GetBooleanQuestion(count);
+            var created = _questionService.CreateBatch(questions);
 
-            return Ok();
+            return Ok(created);
         }
     }
 }

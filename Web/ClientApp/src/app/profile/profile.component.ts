@@ -68,15 +68,29 @@ export class ProfileComponent implements OnInit {
     let index = this.createdQuestions.indexOf(q);
     let remappedQuestion: Question = {
       id: questionId,
+      type: this.modifiedQuestion.type,
+      category: this.modifiedQuestion.category,
+      difficulty: this.modifiedQuestion.difficulty,
       text: this.modifiedQuestion.text,
-      answers: this.modifiedQuestion.answers,
-      explanation: this.modifiedQuestion.explanation
+      explanation: this.modifiedQuestion.explanation,
+      correctAnswers: this.modifiedQuestion.correctAnswers,
+      incorrectAnswers: this.modifiedQuestion.incorrectAnswers,
     };
 
     this.modifiedQuestion.id = questionId
 
     this.http.put(this.baseUrl + `api/question`, this.modifiedQuestion).subscribe(
       result => this.createdQuestions.splice(index, 1, remappedQuestion),
+      error => console.error(error)
+    )
+  }
+
+  onGenerate() {
+
+    console.log('GENERATING')
+
+    this.http.post<void>(this.baseUrl + `api/seed/${10}`, {}).subscribe(
+      result => console.log(result),
       error => console.error(error)
     )
   }

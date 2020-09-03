@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Application.Dto;
 using Application.Entities;
+using Application.Services;
 using AutoMapper;
 
 namespace Web
@@ -9,35 +10,56 @@ namespace Web
     {
         public AutoMapperProfile()
         {
-            CreateMap<Question, QuestionDto>().ForMember(dto => dto.Answers,
-                opt => opt.MapFrom<AnswersResolver>())
-                .ReverseMap()
-                .ForMember(question => question.Answers, opt => opt.MapFrom<NewAnswersResolver>());
+            CreateMap<Question, QuestionDto>()
+                .ForMember(dto => dto.CorrectAnswers, opt => opt.MapFrom(question => Question.SplitAnswers(question.CorrectAnswers)))
+                .ForMember(dto => dto.IncorrectAnswers, opt => opt.MapFrom(question => Question.SplitAnswers(question.IncorrectAnswers)))
+            .ReverseMap()
+                .ForMember(question => question.CorrectAnswers, opt => opt.MapFrom(dto => Question.JoinAnswers(dto.CorrectAnswers)))
+                .ForMember(question => question.IncorrectAnswers, opt => opt.MapFrom(dto => Question.JoinAnswers(dto.IncorrectAnswers)));
 
-            // CreateMap<Question, QuestionDto>().ForMember(dto => dto.Answers,
-            //     expression => expression.MapFrom(question => question.Answers.Split(' ').ToList()));
+            CreateMap<TriviaQuestion, Question>()
+                .ForMember(question => question.AuthorId, member => member.MapFrom(question => "93e584ea-1846-43bc-9906-36beb0cff48c"))
+                .ForMember(question => question.Text, member => member.MapFrom(question => question.Question))
+                .ForMember(question => question.Category, member => member.MapFrom<CategoryResolver>())
+                .ForMember(question => question.Difficulty, member => member.MapFrom(question => question.Difficulty))
+                .ForMember(question => question.CorrectAnswers, member => member.MapFrom(question => question.CorrectAnswer))
+                .ForMember(question => question.IncorrectAnswers, member => member.MapFrom(question => string.Join('|', question.IncorrectAnswers)));
         }
     }
 
-    public class AnswersResolver : IValueResolver<Question, QuestionDto, ICollection<string>>
+    public class CategoryResolver : IValueResolver<TriviaQuestion, Question, QuestionCategory>
     {
-        public ICollection<string> Resolve(Question source, QuestionDto destination, ICollection<string> destMember, ResolutionContext context)
+        public QuestionCategory Resolve(TriviaQuestion source, Question destination, QuestionCategory destMember, ResolutionContext context)
         {
-            return source.Answers.Split(' ');
-        }
-    }
+            var map = new Dictionary<string, QuestionCategory>
+            {
+                ["General Knowledge"] = QuestionCategory.General,
+                ["Entertainment: Books"] = QuestionCategory.Books,
+                ["Entertainment: Film"] = QuestionCategory.Films,
+                ["Entertainment: Music"] = QuestionCategory.Music,
+                ["Entertainment: Musicals &amp; Theatres"] = QuestionCategory.None,
+                ["Entertainment: Television"] = QuestionCategory.Animals,
+                ["Entertainment: Video Games"] = QuestionCategory.VideoGames,
+                ["Entertainment: Board Games"] = QuestionCategory.None,
+                ["Science &amp; Nature"] = QuestionCategory.Nature,
+                ["Science: Computers"] = QuestionCategory.Computers,
+                ["Science: Mathematics"] = QuestionCategory.Mathematics,
+                ["Mythology"] = QuestionCategory.Mythology,
+                ["Sports"] = QuestionCategory.Sports,
+                ["Geography"] = QuestionCategory.Geography,
+                ["History"] = QuestionCategory.History,
+                ["Politics"] = QuestionCategory.Politics,
+                ["Art"] = QuestionCategory.Art,
+                ["Celebrities"] = QuestionCategory.Animals,
+                ["Animals"] = QuestionCategory.Animals,
+                ["Vehicles"] = QuestionCategory.Vehicles,
+                ["Entertainment: Comics"] = QuestionCategory.Comics,
+                ["Science: Gadgets"] = QuestionCategory.Science,
+                ["Entertainment: Japanese Anime &amp; Manga"] = QuestionCategory.Anime,
+                ["Entertainment: Cartoon &amp; Animations"] = QuestionCategory.Cartoons
+            };
 
-    public class NewAnswersResolver : IValueResolver<QuestionDto, Question, string>
-    {
-        public ICollection<string> Resolve(Question source, QuestionDto destination, ICollection<string> destMember, ResolutionContext context)
-        {
-            return source.Answers.Split(' ');
-        }
-
-
-        public string Resolve(QuestionDto source, Question destination, string destMember, ResolutionContext context)
-        {
-            return string.Join(' ', source.Answers);
+            return map.TryGetValue(source.Category, out var category) ? category : QuestionCategory.None;
         }
     }
 }

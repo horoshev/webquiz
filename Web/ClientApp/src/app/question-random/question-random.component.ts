@@ -10,6 +10,8 @@ import {QuestionAnswer} from "../../types/QuestionAnswer";
 })
 export class QuestionRandomComponent implements OnInit {
 
+  _QuestionAnswer = QuestionAnswer
+
   answerValue: string = ''
 
   isError: boolean = false
@@ -17,13 +19,43 @@ export class QuestionRandomComponent implements OnInit {
   question: Question
   userAnswer: QuestionAnswer = QuestionAnswer.Empty
 
+  private _answerOptions : string[]
+
+  get answerOptions(): string[] {
+
+    let correctAnswer = this.randomCorrectAnswer
+    let incorrectAnswers = this.question.incorrectAnswers.slice(0, 3)
+    let answerOptions = incorrectAnswers.concat(correctAnswer)
+
+    if (this._answerOptions == null) {
+      this._answerOptions = answerOptions.sort(() => Math.random() - 0.5)
+    }
+
+    return this._answerOptions
+  }
+
+  get randomCorrectAnswer(): string {
+    return this.question.correctAnswers[Math.floor(Math.random() * this.question.correctAnswers.length)]
+  };
+
+  get isComplete(): boolean {
+    return this.userAnswer === QuestionAnswer.Surrender || this.userAnswer === QuestionAnswer.Correct
+  };
+
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) { }
 
   ngOnInit() {
     this.nextQuestion()
   }
 
+  // nothing happens
   onSkip() {
+    this.cleanUp()
+    this.nextQuestion()
+  }
+
+  // get or lose points
+  onNext() {
     this.cleanUp()
     this.nextQuestion()
   }
@@ -35,7 +67,7 @@ export class QuestionRandomComponent implements OnInit {
   onGuess(guess: string) {
     if (!guess || this.userAnswer === QuestionAnswer.Surrender) return
 
-    this.userAnswer = this.question.answers
+    this.userAnswer = this.question.correctAnswers
       .includes(guess) ? QuestionAnswer.Correct : QuestionAnswer.Wrong;
 
     if (this.userAnswer === QuestionAnswer.Wrong)

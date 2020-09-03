@@ -21,6 +21,8 @@ import { DialogComponent } from './dialog/dialog.component';
 import { StatsComponent } from './stats/stats.component';
 import { SettingsComponent } from './settings/settings.component';
 import { QuestionListComponent } from './question-list/question-list.component';
+import { QuestionFilterComponent } from './question-filter/question-filter.component';
+import { EmptyContentComponent } from './empty-content/empty-content.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +39,9 @@ import { QuestionListComponent } from './question-list/question-list.component';
     DialogComponent,
     StatsComponent,
     SettingsComponent,
-    QuestionListComponent
+    QuestionListComponent,
+    QuestionFilterComponent,
+    EmptyContentComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

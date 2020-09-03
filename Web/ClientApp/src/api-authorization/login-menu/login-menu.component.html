@@ -1,16 +1,43 @@
-<ul class="navbar-nav" *ngIf="isAuthenticated | async">
-    <li class="nav-item">
-        <a  class="nav-link text-dark" [routerLink]='["/authentication/profile"]' title="Manage">Hello {{ userName | async }}</a>
-    </li>
-    <li class="nav-item">
-        <a  class="nav-link text-dark" [routerLink]='["/authentication/logout"]' [state]='{ local: true }' title="Logout">Logout</a>
-    </li>
-</ul>
-<ul class="navbar-nav" *ngIf="!(isAuthenticated | async)">
+<!--<ul class="navbar-nav" *ngIf="isAuthenticated | async">-->
+<!--    <li class="nav-item">-->
+<!--        <a  class="nav-link text-dark" [routerLink]='["/authentication/profile"]' title="Manage">Hello {{ userName | async }}</a>-->
+<!--    </li>-->
+<!--    <li class="nav-item">-->
+<!--        <a  class="nav-link text-dark" [routerLink]='["/authentication/logout"]' [state]='{ local: true }' title="Logout">Logout</a>-->
+<!--    </li>-->
+<!--</ul>-->
+<!--<ul class="navbar-nav" *ngIf="!(isAuthenticated | async)">-->
+<!--  <li class="nav-item">-->
+<!--        <a class="nav-link text-dark" [routerLink]='["/authentication/register"]'>Register</a>-->
+<!--    </li>-->
+<!--    <li class="nav-item">-->
+<!--        <a class="nav-link text-dark" [routerLink]='["/authentication/login"]'>Login</a>-->
+<!--    </li>-->
+<!--</ul>-->
+
+
+<ul class="navbar-nav ml-5" *ngIf="!(isAuthenticated | async)">
   <li class="nav-item">
-        <a class="nav-link text-dark" [routerLink]='["/authentication/register"]'>Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" [routerLink]='["/authentication/login"]'>Login</a>
-    </li>
+    <a class="btn btn-outline-dark" [routerLink]='["/authentication/login"]'>Login</a>
+  </li>
+  <li class="nav-item ml-1">
+    <a class="btn btn-dark text-light" [routerLink]='["/authentication/register"]'>Register</a>
+  </li>
 </ul>
+
+
+<div class="dropdown ml-5" *ngIf="isAuthenticated | async">
+  <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span class="profile-image"></span>
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <p class="text-muted px-4 py-1 m-0">{{userName | async}}</p>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" [routerLinkActive]="['link-active']" [routerLink]="['/profile']">View Profile</a>
+    <a class="dropdown-item" [routerLinkActive]="['link-active']" [routerLink]="['/profile']">Account Settings</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" [routerLinkActive]="['link-active']" [routerLink]="['/question/create']">Create Question</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" [routerLink]='["/authentication/logout"]' [state]='{ local: true }' title="Logout">Log Out</a>
+  </div>
+</div>

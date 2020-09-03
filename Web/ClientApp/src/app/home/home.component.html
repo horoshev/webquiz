@@ -1,3 +1,39 @@
-<h1>Web Quiz!</h1>
-<p>Angular Single Page Application</p>
-<a href="https://docs.google.com/spreadsheets/d/1cjZZMVtu9S2BB5Xes-zogEYW7u8N1MQ3P97n_XlsDYM/">ИПАР</a>
+<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center">
+  <div class="col px-lg-5 mx-auto my-5">
+    <h1 class="display-4 font-weight-normal">Web Quiz</h1>
+    <p class="lead font-weight-normal">
+      Try you knowlege in various quesions.
+      Rate other people questions.
+      Create your own questions.<br/>
+      Gain new knowledge on a topic of interest
+    </p>
+    <a class="btn btn-outline-secondary" target="_blank" href="https://docs.google.com/spreadsheets/d/1cjZZMVtu9S2BB5Xes-zogEYW7u8N1MQ3P97n_XlsDYM/">Checkout ИПАР</a>
+  </div>
+</div>
+
+<hr/>
+
+<div class="mb-5">
+  <app-question-filter [query]="questionQuery" (queryChange)="onFilterChange($event)"></app-question-filter>
+</div>
+
+<app-empty-content *ngIf="questions.length == 0 && !isLoading; else elseBlock">
+  <button class="btn btn-outline-dark mt-4" (click)="onResetFilter()">Reset filter</button>
+</app-empty-content>
+<ng-template #elseBlock>
+  <app-question *ngFor="let question of questions; index as i; last as isLast"
+                [attr.id]="isLast ? 'lastQuestion' : null"
+                [question]="question"
+                [openAnswers]="false"
+                [openControls]="false"
+  ></app-question>
+  <div *ngIf="isEnd" class="alert alert-light mt-4 border-top" role="alert">
+    That's all, we got for now...
+  </div>
+  <div *ngIf="isLoading" class="d-flex justify-content-center mb-5">
+    <strong class="order-2 ml-4 h3">Fetching questions...</strong>
+    <div class="order-1 spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+</ng-template>

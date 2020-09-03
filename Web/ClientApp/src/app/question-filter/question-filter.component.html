@@ -1,0 +1,25 @@
+<div class="shadow filter-wrapper">
+  <div class="d-flex row">
+
+    <div class="col">
+      <label for="questionType" class="select-label">Type:</label>
+      <select id="questionType" class="custom-select" (change)="onTypeChange(typeSelect.value)" #typeSelect>
+        <option *ngFor="let option of typeOptions" [value]="option.value" [selected]="option.value === query.type">{{option.label}}</option>
+      </select>
+    </div>
+
+    <div class="col">
+      <label for="questionDifficulty" class="select-label">Difficulty:</label>
+      <select id="questionDifficulty" class="custom-select" (change)="onDifficultyChange(difficultySelect.value)" #difficultySelect>
+        <option *ngFor="let option of difficultyOptions" [value]="option.value" [selected]="option.value === query.difficulty">{{option.label}}</option>
+      </select>
+    </div>
+
+    <div class="col">
+      <label for="questionCategory" class="select-label">Category:</label>
+      <select id="questionCategory" class="custom-select" (change)="onCategoryChange(categorySelect.value)" #categorySelect>
+        <option *ngFor="let option of categoryOptions" [value]="option.value" [selected]="option.value === query.category">{{option.label}}</option>
+      </select>
+    </div>
+  </div>
+</div>

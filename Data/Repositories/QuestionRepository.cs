@@ -1,15 +1,13 @@
 ﻿using Application.Entities;
 using Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories
 {
-    public class QuestionRepository : Repository<Question>, IQuestionRepository
+    public class QuestionRepository : BaseRepository<Question> , IQuestionRepository
     {
-        private readonly WebQuizDbContext _context;
-
-        public QuestionRepository(WebQuizDbContext context) : base(context)
+        public QuestionRepository(DbContext context) : base(context)
         {
-            _context = context;
         }
     }
 }

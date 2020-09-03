@@ -10,7 +10,7 @@ namespace Web.Common
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context, SameAuthorRequirement requirement, Question resource)
         {
-            if (context.User.GetSubjectIdentifier() == resource.Author.Id)
+            if (context.User.GetSubjectIdentifier() == resource.AuthorId)
             {
                 context.Succeed(requirement);
             }

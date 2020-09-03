@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Application.Dto;
 using Application.Entities;
 using Application.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Web.Common;
 
 namespace Web.Controllers
@@ -16,23 +18,51 @@ namespace Web.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IQuestionService _questionService;
-        private readonly UserManager<User> _userManager;
+        private readonly ILogger<QuestionController> _logger;
 
         public QuestionController(
             IMapper mapper,
             IQuestionService questionService,
-            UserManager<User> userManager)
+            ILogger<QuestionController> logger
+            )
         {
             _mapper = mapper;
             _questionService = questionService;
-            _userManager = userManager;
+            _logger = logger;
         }
 
-        // TODO: Pagination
-        [HttpGet]
-        public IEnumerable<QuestionDto> GetQuestions()
+        [HttpGet("types")]
+        public IEnumerable<object> GetQuestionTypes()
         {
-            return _mapper.Map<IEnumerable<QuestionDto>>(_questionService.GetAll());
+            return GetEnumValues<QuestionType>();
+        }
+
+        [HttpGet("difficulties")]
+        public IEnumerable<object> GetQuestionDifficulties()
+        {
+            return GetEnumValues<QuestionDifficulty>();
+        }
+
+        [HttpGet("categories")]
+        public IEnumerable<object> GetQuestionCategories()
+        {
+            return GetEnumValues<QuestionCategory>();
+        }
+
+        private static IEnumerable<object> GetEnumValues<T>() where T : Enum
+        {
+            foreach (var type in Enum.GetValues(typeof(T)))
+            {
+                yield return new {value = (int)(type ?? -1), label = type?.ToString() ?? ""};
+            }
+        }
+
+        [HttpGet]
+        public IEnumerable<QuestionDto> GetQuestions([FromQuery] QuestionQuery query, [FromQuery] PagingQuery paging)
+        {
+            return _mapper.Map<IEnumerable<QuestionDto>>(_questionService.GetQuestionsByQuery(query))
+                .Skip(paging.StartPage * paging.PageSize)
+                .Take(paging.PageSize);
         }
 
         [HttpGet]
@@ -60,20 +90,6 @@ namespace Web.Controllers
 
         [Authorize]
         [HttpGet]
-        [Route("user")]
-        public IActionResult GetCurrentUser()
-        {
-            // var id = User.GetSubjectIdentifier();
-            // var user = await _userManager.FindByIdAsync(id);
-
-            // var jwtid = User.GetSubjectId();
-            // var user = await _userManager.GetUserAsync(User); // TODO: Figure out
-
-            return Ok();
-        }
-
-        [Authorize]
-        [HttpGet]
         [Route("author")]
         public IEnumerable<QuestionDto> GetAuthorQuestions()
         {
@@ -88,6 +104,10 @@ namespace Web.Controllers
         [HttpPost]
         public IActionResult InsertQuestion(QuestionDto question)
         {
+            question.AuthorId = User.GetSubjectIdentifier();
+
+            _logger.LogInformation($"User {User.GetSubjectIdentifier()} is creating the question.");
+
             var createdQuestion = _questionService.Create(question);
 
             if (createdQuestion is null) return BadRequest();
@@ -109,8 +129,10 @@ namespace Web.Controllers
 
         [Authorize(nameof(QuestionPolicy))]
         [HttpPut]
-        public IActionResult UpdateQuestion(QuestionDto question)
+        public IActionResult UpdateQuestion([FromHeader] string userId, QuestionDto question)
         {
+            question.AuthorId = userId;
+
             var updatedQuestion = _questionService.Update(question);
 
             if (updatedQuestion is null) return BadRequest();

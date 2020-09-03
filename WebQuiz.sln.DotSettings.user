@@ -3,9 +3,19 @@
   &lt;Assembly Path="C:\Users\artem\.nuget\packages\identityserver4.entityframework.storage\3.0.0\lib\netstandard2.1\IdentityServer4.EntityFramework.Storage.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\artem\.nuget\packages\moq\4.14.5\lib\netstandard2.0\Moq.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c07b1a0e_002D88d8_002D4800_002Da2e4_002D25b1e0a3dd0e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Project Location="D:\dev\WebQuiz" Presentation="&amp;lt;Tests&amp;gt;" /&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=4139ee5d_002D57e9_002D4508_002Dad30_002D73102da153f3/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
+	
+	
+	
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=appsettings/@EntryIndexedValue">True</s:Boolean>
+	
+	
+	
+	
+	
 	
 	
 	

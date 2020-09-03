@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(WebQuizDbContext))]
-    [Migration("20200809145458_Initial")]
+    [Migration("20200825085819_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,34 +24,50 @@ namespace Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Answers")
+                    b.Property<string>("AuthorId")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("AuthorId")
+                    b.Property<int>("Category")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CorrectAnswers")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2020, 8, 9, 21, 54, 58, 227, DateTimeKind.Local).AddTicks(1142));
+                        .HasDefaultValue(new DateTime(2020, 8, 25, 15, 58, 19, 302, DateTimeKind.Local).AddTicks(6828));
+
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IncorrectAnswers")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Sources")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnUpdate()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2020, 8, 9, 21, 54, 58, 230, DateTimeKind.Local).AddTicks(716));
+                        .HasDefaultValue(new DateTime(2020, 8, 25, 15, 58, 19, 305, DateTimeKind.Local).AddTicks(4986));
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
 
                     b.ToTable("Questions");
                 });
@@ -76,9 +92,11 @@ namespace Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")
@@ -338,15 +356,6 @@ namespace Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("Application.Entities.Question", b =>
-                {
-                    b.HasOne("Application.Entities.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

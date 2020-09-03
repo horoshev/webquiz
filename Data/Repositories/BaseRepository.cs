@@ -5,15 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories
 {
-    public class CrudRepository<T> : ICrudRepository<T> where T : class
+    public class BaseRepository<T> : Repository<T>, IBaseRepository<T> where T : class, IRepositoryEntity
     {
-        protected readonly DbContext Context;
-        protected readonly DbSet<T> Entities;
-
-        protected CrudRepository(DbContext context)
+        public BaseRepository(DbContext context) : base(context)
         {
-            Context = context;
-            Entities = Context.Set<T>();
         }
 
         public IEnumerable<T> GetAll()
@@ -33,20 +28,23 @@ namespace Data.Repositories
             return entity;
         }
 
-        public void Update(T entity)
+        public T Update(T entity)
         {
             Context.Entry(entity).State = EntityState.Modified;
+
+            return entity;
         }
 
-        public void Delete(T entity)
+        public T Delete(T entity)
         {
-            Entities.Remove(entity);
+            return Entities.Remove(entity).Entity;
         }
 
-        public void Delete(int entityId)
+        public T Delete(int entityId)
         {
             var entity = Entities.Find(entityId);
-            Entities.Remove(entity);
+
+            return Entities.Remove(entity).Entity;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Application.Validators;
@@ -7,11 +6,6 @@ using NUnit.Framework;
 
 namespace Tests.Application.Validators
 {
-    public static class M
-    {
-        public static string a = "";
-    }
-
     public class CollectionAttributeTests
     {
         public static List<string> NullCollection = null;

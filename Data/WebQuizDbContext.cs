@@ -9,27 +9,27 @@ namespace Data
 {
     public class WebQuizDbContext : ApiAuthorizationDbContext<User>
     {
-        public DbSet<Question> Questions { get; set; }
-
         public WebQuizDbContext(
             DbContextOptions<WebQuizDbContext> options,
             IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
         {
         }
 
+        public DbSet<Question> Questions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<Question>()
-                .Property(p => p.CreatedAt)
+                .Property(b => b.CreatedAt)
                 .HasDefaultValue(DateTime.Now)
                 .ValueGeneratedOnAdd();
 
             builder.Entity<Question>()
                 .Property(p => p.UpdatedAt)
                 .HasDefaultValue(DateTime.Now)
-                .ValueGeneratedOnUpdate();
+                .ValueGeneratedOnAddOrUpdate();
         }
     }
 }

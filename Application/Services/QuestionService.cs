@@ -8,87 +8,25 @@ using AutoMapper;
 
 namespace Application.Services
 {
-    public class QuestionService : IQuestionService
+    public class QuestionService : BaseService<QuestionDto, Question>, IQuestionService
     {
-        private readonly IMapper _mapper;
-        private readonly IQuestionRepository _questionRepository;
-
-        public QuestionService(IQuestionRepository questionRepository, IMapper mapper)
+        public QuestionService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
-            _questionRepository = questionRepository;
-            _mapper = mapper;
-        }
-
-        public IEnumerable<Question> GetAll()
-        {
-            return _questionRepository.GetAll();
-        }
-
-        public Question Get(int entityId)
-        {
-            return _questionRepository.Get(entityId);
-        }
-
-        public Question? Create(QuestionDto entity)
-        {
-            if (entity is null) return null;
-
-            var question = _mapper.Map<Question>(entity);
-            // new Question
-            // {
-            //     Text = questionRequest.Text,
-            //     Answers = string.Join(' ', questionRequest.Answers),
-            //     Explanation = questionRequest.Explanation,
-            //     Author = author
-            // };
-
-            question = _questionRepository.Create(question);
-            _questionRepository.SaveChanges();
-
-            return question;
-        }
-
-        public Question? Update(QuestionDto entity)
-        {
-            if (entity is null) return null;
-
-            var question = _questionRepository.Get(entity.Id);
-            if (question is null) return null;
-
-            question = PatchValues(question, entity); // var patch = _mapper.Map<Question>(entity);
-            _questionRepository.Update(question);
-            _questionRepository.SaveChanges();
-
-            return question;
-        }
-
-        public Question? Delete(QuestionDto entity)
-        {
-            if (entity is null)
-            {
-                return null;
-            }
-
-            return Delete(entity.Id);
-        }
-
-        public Question? Delete(int entityId)
-        {
-            var question = _questionRepository.Get(entityId);
-            if (question is null) return null;
-
-            _questionRepository.Delete(entityId);
-            _questionRepository.SaveChanges();
-
-            return question;
         }
 
         public Question? GetRandomQuestion()
         {
-            var count = _questionRepository.Count();
+            var count = Repository.Count();
             var index = new Random().Next(count);
 
-            return _questionRepository.GetByIndex(index);
+            return Repository.GetByIndex(index);
+        }
+
+        public IEnumerable<Question> GetQuestionsByQuery(QuestionQuery query)
+        {
+            query ??= new QuestionQuery();
+
+            return Repository.Query(query.Expression);
         }
 
         public IEnumerable<Question> GetQuestionByAuthorId(string authorId)
@@ -98,13 +36,36 @@ namespace Application.Services
                 return Enumerable.Empty<Question>();
             }
 
-            return _questionRepository.Query(q => q.Author.Id == authorId);
+            return Repository.Query(q => q.AuthorId == authorId);
+        }
+
+        public IEnumerable<Question> CreateBatch(ICollection<TriviaQuestion> questions)
+        {
+            var created = questions
+                .Select(question => Mapper.Map<Question>(question))
+                .Select(question => Repository.Create(question)).ToList();
+
+            // Repository.Create(new Question
+            // {
+            //     AuthorId = "93e584ea-1846-43bc-9906-36beb0cff48c",
+            //     Type = QuestionType.Boolean,
+            //     Category = QuestionCategory.Animals,
+            //     Difficulty = QuestionDifficulty.Easy,
+            //     Text = "Anime?",
+            //     CorrectAnswers = "Yes",
+            //     IncorrectAnswers = "No"
+            // });
+
+            Repository.SaveChanges();
+
+            // return created;
+            return Enumerable.Empty<Question>();
         }
 
         private static Question PatchValues(Question original, QuestionDto request)
         {
             original.Text = request.Text;
-            original.Answers = string.Join(' ', request.Answers);
+            original.CorrectAnswers = string.Join(' ', request.CorrectAnswers); // TODO: Fix
             original.Explanation = request.Explanation;
 
             return original;

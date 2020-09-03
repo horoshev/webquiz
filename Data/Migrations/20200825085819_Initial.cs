@@ -40,8 +40,8 @@ namespace Data.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
-                    FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true)
+                    FirstName = table.Column<string>(nullable: false),
+                    LastName = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -80,6 +80,29 @@ namespace Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PersistedGrants", x => x.Key);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Questions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AuthorId = table.Column<string>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
+                    Category = table.Column<int>(nullable: false),
+                    Difficulty = table.Column<int>(nullable: false),
+                    Text = table.Column<string>(nullable: false),
+                    Explanation = table.Column<string>(nullable: false),
+                    CorrectAnswers = table.Column<string>(nullable: false),
+                    IncorrectAnswers = table.Column<string>(nullable: false),
+                    Sources = table.Column<string>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 25, 15, 58, 19, 302, DateTimeKind.Local).AddTicks(6828)),
+                    UpdatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 25, 15, 58, 19, 305, DateTimeKind.Local).AddTicks(4986))
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -188,30 +211,6 @@ namespace Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Questions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Text = table.Column<string>(nullable: false),
-                    Explanation = table.Column<string>(nullable: true),
-                    Answers = table.Column<string>(nullable: false),
-                    AuthorId = table.Column<string>(nullable: false),
-                    CreatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 9, 21, 54, 58, 227, DateTimeKind.Local).AddTicks(1142)),
-                    UpdatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 9, 21, 54, 58, 230, DateTimeKind.Local).AddTicks(716))
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Questions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Questions_AspNetUsers_AuthorId",
-                        column: x => x.AuthorId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -269,11 +268,6 @@ namespace Data.Migrations
                 name: "IX_PersistedGrants_SubjectId_ClientId_Type",
                 table: "PersistedGrants",
                 columns: new[] { "SubjectId", "ClientId", "Type" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Questions_AuthorId",
-                table: "Questions",
-                column: "AuthorId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

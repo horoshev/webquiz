@@ -1,25 +1,38 @@
 ﻿using System.Collections.Generic;
 using Application.Dto;
 using Application.Entities;
+using Application.Services;
 
 namespace Application.Interfaces
 {
     // TODO: Paging and Sorting
-    public interface IQuestionService
+    public interface IQuestionService : IBaseOperations<QuestionDto, Question>
     {
-        IEnumerable<Question> GetAll();
         /// <summary>
-        /// Returns question with provided id
+        /// Select single question from all and returning it.
         /// </summary>
-        /// <param name="entityId">Identifier of the question</param>
-        /// <returns>Founded question of null if question was not found</returns>
-        Question Get(int entityId);
-        Question? Create(QuestionDto entity);
-        Question? Update(QuestionDto entity);
-        Question? Delete(QuestionDto entity);
-        Question? Delete(int entityId);
-
+        /// <returns>Random question or null if there is no questions.</returns>
         Question? GetRandomQuestion();
+
+        /// <summary>
+        /// Returning all questions matches question query parameters.
+        /// </summary>
+        /// <param name="query">Query with question parameters.</param>
+        /// <returns>Questions matches query parameters.</returns>
+        IEnumerable<Question> GetQuestionsByQuery(QuestionQuery query);
+
+        /// <summary>
+        /// Returning all questions with provided authorId.
+        /// </summary>
+        /// <param name="authorId">Identifier of question author.</param>
+        /// <returns>Questions matches authorId.</returns>
         IEnumerable<Question> GetQuestionByAuthorId(string authorId);
+
+        /// <summary>
+        /// Adding multiple questions from 3rd party API.
+        /// </summary>
+        /// <param name="questions">Questions to add in data source.</param>
+        /// <returns>Questions added to data source.</returns>
+        IEnumerable<Question> CreateBatch(ICollection<TriviaQuestion> questions);
     }
 }

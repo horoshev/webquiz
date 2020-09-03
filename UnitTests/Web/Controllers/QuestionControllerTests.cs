@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
@@ -48,18 +50,18 @@ namespace Tests.Web.Controllers
 
         private static Question[] _testQuestions =
         {
-            new Question{Id = 1, Text = "Test 1", Explanation = "Exp 1", Author = TestUsers[0]},
-            new Question{Id = 2, Text = "Test 2", Explanation = "Exp 2", Author = TestUsers[1]},
-            new Question{Id = 3, Text = "Test 3", Explanation = "Exp 3", Author = TestUsers[0]},
-            new Question{Id = 4, Text = "Test 4", Explanation = "Exp 4", Author = TestUsers[0]},
-            new Question{Id = 5, Text = "Test 5", Explanation = "Exp 5", Author = TestUsers[1]}
+            new Question{Id = 1, Text = "Test 1", Explanation = "Exp 1", AuthorId = TestUsers[0].Id, CorrectAnswers = "", IncorrectAnswers = ""},
+            new Question{Id = 2, Text = "Test 2", Explanation = "Exp 2", AuthorId = TestUsers[1].Id, CorrectAnswers = "", IncorrectAnswers = ""},
+            new Question{Id = 3, Text = "Test 3", Explanation = "Exp 3", AuthorId = TestUsers[0].Id, CorrectAnswers = "", IncorrectAnswers = ""},
+            new Question{Id = 4, Text = "Test 4", Explanation = "Exp 4", AuthorId = TestUsers[0].Id, CorrectAnswers = "", IncorrectAnswers = ""},
+            new Question{Id = 5, Text = "Test 5", Explanation = "Exp 5", AuthorId = TestUsers[1].Id, CorrectAnswers = "", IncorrectAnswers = ""}
         };
 
         private static object[] _questionsByAuthorCases =
         {
-            new object[] {TestUsers[0], _testQuestions.Where(question => question.Author.Id == TestUsers[0].Id).ToArray()},
-            new object[] {TestUsers[1], _testQuestions.Where(question => question.Author.Id == TestUsers[1].Id).ToArray()},
-            new object[] {TestUsers[2], _testQuestions.Where(question => question.Author.Id == TestUsers[2].Id).ToArray()}
+            new object[] {TestUsers[0], _testQuestions.Where(question => question.AuthorId == TestUsers[0].Id).ToArray()},
+            new object[] {TestUsers[1], _testQuestions.Where(question => question.AuthorId == TestUsers[1].Id).ToArray()},
+            new object[] {TestUsers[2], _testQuestions.Where(question => question.AuthorId == TestUsers[2].Id).ToArray()}
         };
 
         private static object[] _questionCreateCases =
@@ -72,27 +74,51 @@ namespace Tests.Web.Controllers
         [SetUp]
         public void SetUp()
         {
+            var logger = new Mock<ILogger<QuestionController>>();
+
             _questionServiceMockWithoutData = EmptyQuestionServiceMock();
             _questionServiceMock = QuestionServiceMock();
             _userManagerMock = UserManagerMock();
 
-            _testController = new QuestionController(Mapper, _questionServiceMock.Object, _userManagerMock.Object);
-            _testControllerWithoutData = new QuestionController(Mapper, _questionServiceMockWithoutData.Object, _userManagerMock.Object);
+            _testController = new QuestionController(Mapper, _questionServiceMock.Object, logger.Object);
+            _testControllerWithoutData = new QuestionController(Mapper, _questionServiceMockWithoutData.Object, logger.Object);
         }
 
         [Test]
         public void ShouldReturnAllQuestions()
         {
-            var actualQuestions = _testController.GetQuestions();
+            var actualQuestions = _testController.GetQuestions(new QuestionQuery(), new PagingQuery());
 
             actualQuestions.Should().BeAssignableTo<IEnumerable<QuestionDto>>()
                 .Which.Select(q => q.Id).Should().BeEquivalentTo(_testQuestions.Select(q => q.Id));
         }
 
+        private static PagingQuery[] _pagingTestCases =
+        {
+            new PagingQuery(),
+            new PagingQuery {PageSize = 1},
+            new PagingQuery {PageSize = 3},
+            new PagingQuery {PageSize = 5},
+            new PagingQuery {PageSize = 20}
+        };
+
+        [TestCaseSource(nameof(_pagingTestCases))]
+        public void ShouldReturnQuestionsPageWithProvidedSize(PagingQuery pagingQuery)
+        {
+            var maximumPageSize = pagingQuery.PageSize;
+
+            var actualQuestions = _testController.GetQuestions(new QuestionQuery(), pagingQuery);
+
+            actualQuestions.Should().BeAssignableTo<IEnumerable<QuestionDto>>()
+                .And.HaveCountLessOrEqualTo(maximumPageSize, "Controller should not return more questions than client requested")
+                .And.Subject.Select(q => q.Id).Should()
+                .BeEquivalentTo(_testQuestions.Select(q => q.Id).Skip(pagingQuery.StartPage * pagingQuery.PageSize).Take(pagingQuery.PageSize));
+        }
+
         [Test]
         public void ShouldReturnAllQuestionsEmpty()
         {
-            var actualQuestions = _testControllerWithoutData.GetQuestions();
+            var actualQuestions = _testControllerWithoutData.GetQuestions(new QuestionQuery(), new PagingQuery());
 
             actualQuestions.Should().BeAssignableTo<IEnumerable<QuestionDto>>().Which.Should().BeEmpty();
         }
@@ -265,11 +291,15 @@ namespace Tests.Web.Controllers
 
             questionServiceMock
                 .Setup(service => service.GetRandomQuestion())
-                .Returns(() => new Question());
+                .Returns(() => _testQuestions[new Random().Next(_testQuestions.Length)]);
 
             questionServiceMock
                 .Setup(service => service.GetAll())
                 .Returns(() => _testQuestions);
+
+            questionServiceMock
+                .Setup(service => service.GetQuestionsByQuery(It.IsAny<QuestionQuery>()))
+                .Returns<QuestionQuery>(query => _testQuestions.Where(query.Expression.Compile()));
 
             questionServiceMock
                 .Setup(service => service.Get(It.IsAny<int>()))
@@ -277,12 +307,12 @@ namespace Tests.Web.Controllers
 
             questionServiceMock
                 .Setup(service => service.GetQuestionByAuthorId(It.IsAny<string>()))
-                .Returns<string>(id => _testQuestions.Where(question => question.Author.Id == id).ToArray());
+                .Returns<string>(id => _testQuestions.Where(question => question.AuthorId == id).ToArray());
 
             questionServiceMock
                 .Setup(service => service.Create(It.IsAny<QuestionDto>()))
                 .Returns<Question>(question => {
-                    question.Id = int.Parse(question.Author.Id.Last().ToString());
+                    question.Id = int.Parse(question.AuthorId.Last().ToString());
                     return question;
                 });
 

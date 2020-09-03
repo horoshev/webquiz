@@ -19,14 +19,17 @@ export class QuestionCreateComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private http: HttpClient, @Inject('BASE_URL') private baseUrl: string, private router: Router) {
     this.questionForm = fb.group({
-      text: ['', Validators.required],
-      answers: fb.array([fb.control('')]),
-      explanation: ['', Validators.required],
+      type: ['', [Validators.required]],
+      difficulty: ['', [Validators.required]],
+      category: ['', [Validators.required]],
+      text: ['', [Validators.required]],
+      correctAnswers: fb.array([fb.control('')]),
+      explanation: ['', [Validators.required]],
     })
   }
 
   get answersFormArray() {
-    return (<FormArray> this.questionForm.get('answers'));
+    return (<FormArray> this.questionForm.get('correctAnswers'));
   }
 
   @Input()
@@ -36,39 +39,31 @@ export class QuestionCreateComponent implements OnInit {
 
     let value = {
       text: question.text,
-      answers: question.answers,
+      correctAnswers: question.correctAnswers,
       explanation: question.explanation,
     }
 
-    let answersArray = this.questionForm.get('answers') as FormArray
+    let answersArray = this.questionForm.get('correctAnswers') as FormArray
     answersArray.clear()
 
-    value.answers.forEach(() => this.addAnswer())
+    value.correctAnswers.forEach(() => this.addAnswer())
     this.questionForm.patchValue(value)
   }
 
   @Output() modifiedQuestion = new EventEmitter<any>();
 
+  typeOptions: { value: number, label: string }[];
+  difficultyOptions: { value: number, label: string }[];
+  categoryOptions: { value: number, label: string }[];
+
   onChange() {
     this.modifiedQuestion.emit(this.questionForm.value)
   }
 
-  get tt() {
-
-    let value = this.questionForm.value
-    let quest: Question
-
-    quest = {
-      text: value.text,
-      answers: value.answers.join(' '),
-      explanation: value.explanation
-    }
-
-    return this.questionForm.value
-    return quest
-  }
-
   ngOnInit() {
+    this.http.get<{ value: number, label: string }[]>(this.baseUrl + 'api/question/types').subscribe(value => this.typeOptions = value)
+    this.http.get<{ value: number, label: string }[]>(this.baseUrl + 'api/question/difficulties').subscribe(value => this.difficultyOptions = value)
+    this.http.get<{ value: number, label: string }[]>(this.baseUrl + 'api/question/categories').subscribe(value => this.categoryOptions = value)
   }
 
   createAnswerGroup() {
@@ -92,8 +87,4 @@ export class QuestionCreateComponent implements OnInit {
       }
     )
   }
-}
-
-interface Errors {
-  [key: string]: string
 }

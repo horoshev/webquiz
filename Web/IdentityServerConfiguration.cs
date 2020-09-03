@@ -5,6 +5,7 @@ using IdentityServer4;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
+using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 using Client = IdentityServer4.Models.Client;
 using IdentityResource = IdentityServer4.Models.IdentityResource;
 using Secret = IdentityServer4.Models.Secret;
@@ -25,7 +26,7 @@ namespace Web
             {
                 new ApiScope()
                 {
-                    // ApiResource = new ApiResource() "api1",
+                    ApiResource = new ApiResource(),
                     Name = "qAPI"
                 }
             };
@@ -71,8 +72,8 @@ namespace Web
         {
             new TestUser
             {
-                SubjectId = "SUBJECT-ID",
-                Username = "TestUsername",
+                SubjectId = "testId",
+                Username = "test@email.com",
                 Password = "TestPassword",
                 Claims = new List<Claim>
                 {

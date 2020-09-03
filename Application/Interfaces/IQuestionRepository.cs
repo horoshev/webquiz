@@ -2,7 +2,7 @@
 
 namespace Application.Interfaces
 {
-    public interface IQuestionRepository : IRepository<Question>
+    public interface IQuestionRepository : IBaseRepository<Question>
     {
     }
 }
