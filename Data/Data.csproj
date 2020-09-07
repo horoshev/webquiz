@@ -14,4 +14,8 @@
       <ProjectReference Include="..\Application\Application.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="app.db" Link="Data\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
+    </ItemGroup>
+
 </Project>

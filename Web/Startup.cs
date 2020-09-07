@@ -1,8 +1,11 @@
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using Application.Entities;
 using Application.Interfaces;
 using Application.Services;
 using AutoMapper;
 using Data;
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,18 +48,32 @@ namespace Web
 
                     options.SignIn.RequireConfirmedAccount = true;
                 })
-                .AddEntityFrameworkStores<WebQuizDbContext>()
-                .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<WebQuizDbContext>();
 
+            services.AddAuthentication()
+                .AddIdentityServerJwt();
+
+            // var credential = new X509Certificate2(File.ReadAllBytes("webquiz.pfx"), "password");
             services.AddIdentityServer()
                 .AddApiAuthorization<User, WebQuizDbContext>();
+                // .AddTestUsers(Config.TestUsers);
+                // .AddSigningCredential(credential)
+                // .AddInMemoryClients(new []
+                // {
+                //     new Client
+                //     {
+                //         ClientId = "Web",
+                //         ClientName = "Web",
+                //         AllowedGrantTypes = GrantTypes.Code,
+                //
+                //         AllowOfflineAccess = true,
+                //         AllowedScopes = { "openid", "profile", "WebAPI" }
+                //     }
+                // });
 
             services.AddAuthorization(options =>
                 options.AddPolicy(nameof(QuestionPolicy),
                     policy => policy.Requirements = QuestionPolicy.Requirements));
-
-            services.AddAuthentication()
-                .AddIdentityServerJwt();
 
             services.AddMetrics();
             services.AddAutoMapper(typeof(Startup));
@@ -103,8 +120,8 @@ namespace Web
             app.UseRouting();
 
             app.UseAuthentication();
-            app.UseIdentityServer();
             app.UseAuthorization();
+            app.UseIdentityServer();
 
             // app.UseAuthor();
 

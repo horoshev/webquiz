@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using AutoMapper.Configuration;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
+using NLog.Fluent;
 using ApiResource = IdentityServer4.EntityFramework.Entities.ApiResource;
 using Client = IdentityServer4.Models.Client;
 using IdentityResource = IdentityServer4.Models.IdentityResource;
@@ -82,5 +86,14 @@ namespace Web
                 }
             }
         };
+
+        public static X509Certificate2 Certificate(IConfiguration configuration)
+        {
+            using var certStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            certStore.Open(OpenFlags.ReadOnly);
+            var certCollection = certStore.Certificates.Find(X509FindType.FindByThumbprint, "CB781679561914B7539BE120EE9C4F6780579A86", false);
+
+            return default;
+        }
     }
 }

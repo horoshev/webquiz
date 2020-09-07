@@ -44,6 +44,9 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
           <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </Content>
+        <None Update="web.crt" CopyToOutputDirectory="Always" />
+        <None Update="web.key" CopyToOutputDirectory="Always" />
+        <None Update="web.pfx" CopyToOutputDirectory="Always" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Data\Data.csproj" />

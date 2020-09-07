@@ -112,7 +112,7 @@ namespace Web.Controllers
 
             if (createdQuestion is null) return BadRequest();
 
-            return Ok(createdQuestion.Id.ToString());
+            return Ok(_mapper.Map<QuestionDto>(createdQuestion));
         }
 
         [Authorize(nameof(QuestionPolicy))]
