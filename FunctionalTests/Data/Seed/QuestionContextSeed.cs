@@ -35,13 +35,13 @@ namespace FunctionalTests.Data.Seed
 
             await userManager.AddPasswordAsync(user, "TestPassword");
         }
-        
+
         public static IEnumerable<Question> TestQuestions => new []
         {
             new Question
             {
                 Id = 1,
-                AuthorId = "",
+                AuthorId = "1",
                 Category = QuestionCategory.Anime,
                 Difficulty = QuestionDifficulty.Hard,
                 Text = "is this test db?",
@@ -51,7 +51,7 @@ namespace FunctionalTests.Data.Seed
             new Question
             {
                 Id = 2,
-                AuthorId = "",
+                AuthorId = "2",
                 Category = QuestionCategory.Animals,
                 Difficulty = QuestionDifficulty.Easy,
                 Text = "rly?",
@@ -61,7 +61,7 @@ namespace FunctionalTests.Data.Seed
             new Question
             {
                 Id = 3,
-                AuthorId = "",
+                AuthorId = "2",
                 Category = QuestionCategory.Art,
                 Difficulty = QuestionDifficulty.Medium,
                 Text = "no, rly?",

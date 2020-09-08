@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Application.Dto;
 using Application.Entities;
 using FluentAssertions;
+using FluentAssertions.Equivalency;
 using FunctionalTests.Data.Seed;
 using Newtonsoft.Json;
 using Tests;
@@ -19,27 +20,20 @@ namespace FunctionalTests.Web.Controllers
     {
         public QuestionControllerTests(WebTestFixture factory)
         {
-            AnonymousUser = factory.CreateClient();
-            AuthenticatedUser = WebTestFixture.AuthenticateUser(factory.CreateClient());
+            Factory = factory;
         }
 
-        private HttpClient AnonymousUser { get; }
-        private HttpClient AuthenticatedUser { get; }
+        private WebTestFixture Factory { get; }
 
-        [Fact(Skip = "Fail")]
-        public async Task ReturnsRedirectGivenAnonymousUser()
-        {
-            var response = await AnonymousUser.GetAsync("weatherforecast");
-            var redirectLocation = response.Headers.Location.OriginalString;
-
-            response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-            redirectLocation.Should().Contain("/Account/Login");
-        }
+        private readonly Func<EquivalencyAssertionOptions<QuestionDto>, EquivalencyAssertionOptions<QuestionDto>> _excludeDate =
+            options => options.Excluding(info => info.SelectedMemberInfo.MemberType == typeof(DateTime?));
 
         [Fact]
         public async Task ReturnsUnauthorizedGivenAnonymousUser()
         {
-            var response = await AnonymousUser.GetAsync("api/question/random");
+            var anonymousUser = Factory.CreateClient();
+
+            var response = await anonymousUser.GetAsync("api/question/random");
 
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
@@ -47,15 +41,20 @@ namespace FunctionalTests.Web.Controllers
         [Fact]
         public async Task ReturnsOkForAuthorizedUser()
         {
-            var response = await AuthenticatedUser.GetAsync("api/question/random");
+            var authenticatedUser = WebTestFixture.AuthenticateUser(Factory.CreateClient());
+
+            var response = await authenticatedUser.GetAsync("api/question/random");
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
-        [Fact(Skip = "Number of questions is changed during the test.")]
-        public async Task ReturnsOkGivenAnonymousUser()
+        // ToDo: Fix issue with database changes during the tests
+        [Fact]
+        public async Task _ReturnsOkGivenAnonymousUser()
         {
-            var response = await AnonymousUser.GetAsync("api/question/");
+            var anonymousUser = Factory.CreateClient();
+
+            var response = await anonymousUser.GetAsync("api/question/");
             var body = await response.Content.ReadAsStringAsync();
             var content = JsonConvert.DeserializeObject<IEnumerable<QuestionDto>>(body);
 
@@ -67,8 +66,9 @@ namespace FunctionalTests.Web.Controllers
         public async Task GetExistingQuestionById()
         {
             const int questionId = 1;
+            var authenticatedUser = WebTestFixture.AuthenticateUser(Factory.CreateClient());
 
-            var response = await AuthenticatedUser.GetAsync($"api/question/{questionId}");
+            var response = await authenticatedUser.GetAsync($"api/question/{questionId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var body = await response.Content.ReadAsStringAsync();
@@ -77,15 +77,16 @@ namespace FunctionalTests.Web.Controllers
             var testQuestion = QuestionContextSeed.TestQuestions.First(q => q.Id == questionId);
             var expected = Utils.Mapper.Map<QuestionDto>(testQuestion);
 
-            actual.Should().BeEquivalentTo(expected, options => options.Excluding(info => info.SelectedMemberInfo.MemberType == typeof(DateTime?)));
+            actual.Should().BeEquivalentTo(expected, _excludeDate);
         }
 
         [Fact]
         public async Task GetNonExistingQuestionById()
         {
             const int questionId = 666;
+            var authenticatedUser = WebTestFixture.AuthenticateUser(Factory.CreateClient());
 
-            var response = await AuthenticatedUser.GetAsync($"api/question/{questionId}");
+            var response = await authenticatedUser.GetAsync($"api/question/{questionId}");
 
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
@@ -104,7 +105,9 @@ namespace FunctionalTests.Web.Controllers
                 IncorrectAnswers = new List<string> {"Yes"}
             };
             var request = new StringContent(JsonConvert.SerializeObject(newQuestion), Encoding.UTF8, "application/json");
-            var response = await AuthenticatedUser.PostAsync("api/question/", request);
+            var authenticatedUser = WebTestFixture.AuthenticateUser(Factory.CreateClient());
+
+            var response = await authenticatedUser.PostAsync("api/question/", request);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var body = await response.Content.ReadAsStringAsync();
@@ -113,28 +116,70 @@ namespace FunctionalTests.Web.Controllers
             content.Should().BeEquivalentTo(newQuestion,
                 options => options.Excluding(dto => dto.Id).Excluding(dto => dto.AuthorId)
                     .Excluding(info => info.SelectedMemberInfo.MemberType == typeof(DateTime?)));
+
+            content.Id.Should().BeGreaterThan(QuestionContextSeed.TestQuestions.Count());
+            content.AuthorId.Should().Be("123", "this value set in auth handler");
+
+            // Clean Up
+            response = await authenticatedUser.DeleteAsync($"api/question/{content.Id}");
+            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
-        [Fact(Skip = "Fail")]
+        public static TheoryData<(string userId, IEnumerable<Question> expected)> AuthorQuestionTestCases => new TheoryData<(string userId, IEnumerable<Question> expected)>
+        {
+            ("1", QuestionContextSeed.TestQuestions.Where(q => q.AuthorId == "1")),
+            ("2", QuestionContextSeed.TestQuestions.Where(q => q.AuthorId == "2")),
+            ("42", QuestionContextSeed.TestQuestions.Where(q => q.AuthorId == "42")),
+        };
+
+        [Theory]
+        [MemberData(nameof(AuthorQuestionTestCases))]
+        public async Task GetQuestionsWithAuthorId((string userId, IEnumerable<Question> expected) testCase)
+        {
+            var (userId, expected) = testCase;
+            var author = WebTestFixture.AuthenticateUser(Factory.CreateClient(), userId);
+
+            var response = await author.GetAsync("api/question/author");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var body = await response.Content.ReadAsStringAsync();
+            var actual = JsonConvert.DeserializeObject<IEnumerable<QuestionDto>>(body);
+
+            var expectedDto = Utils.Mapper.Map<IEnumerable<Question>, IEnumerable<QuestionDto>>(expected);
+            actual.Should().BeEquivalentTo(expectedDto, _excludeDate);
+        }
+
+        [Fact]
+        public async Task PolicyShouldReturnForbidden()
+        {
+            var question = QuestionContextSeed.TestQuestions.First();
+            var author = WebTestFixture.AuthenticateUser(Factory.CreateClient(), question.AuthorId + 1);
+
+            var response = await author.DeleteAsync($"api/question/{question.Id}");
+
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
         public async Task DeleteShouldReturnNoContent()
         {
-            var response = await AuthenticatedUser.GetAsync("api/question/");
-            var body = await response.Content.ReadAsStringAsync();
-            var content = JsonConvert.DeserializeObject<IEnumerable<QuestionDto>>(body);
+            var question = QuestionContextSeed.TestQuestions.First();
+            var author = WebTestFixture.AuthenticateUser(Factory.CreateClient(), question.AuthorId);
 
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-            content.Should().HaveCount(QuestionContextSeed.TestQuestions.Count());
+            var response = await author.DeleteAsync($"api/question/{question.Id}");
+
+            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
-        [Fact(Skip = "Fail")]
+        [Fact]
         public async Task DeleteShouldReturnBadRequest()
         {
-            var response = await AuthenticatedUser.GetAsync("api/question/");
-            var body = await response.Content.ReadAsStringAsync();
-            var content = JsonConvert.DeserializeObject<IEnumerable<QuestionDto>>(body);
+            var question = QuestionContextSeed.TestQuestions.First();
+            var author = WebTestFixture.AuthenticateUser(Factory.CreateClient(), question.AuthorId);
 
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-            content.Should().HaveCount(QuestionContextSeed.TestQuestions.Count());
+            var response = await author.DeleteAsync($"api/question/{112233}");
+
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
     }
 }

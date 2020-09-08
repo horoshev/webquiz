@@ -8,6 +8,7 @@ using Application.Entities;
 using Application.Interfaces;
 using AutoMapper;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -80,8 +81,10 @@ namespace Tests.Web.Controllers
             _questionServiceMock = QuestionServiceMock();
             _userManagerMock = UserManagerMock();
 
-            _testController = new QuestionController(Mapper, _questionServiceMock.Object, logger.Object);
-            _testControllerWithoutData = new QuestionController(Mapper, _questionServiceMockWithoutData.Object, logger.Object);
+            var authMock = new Mock<IAuthorizationService>();
+
+            _testController = new QuestionController(Mapper, authMock.Object, _questionServiceMock.Object, logger.Object);
+            _testControllerWithoutData = new QuestionController(Mapper, authMock.Object, _questionServiceMockWithoutData.Object, logger.Object);
         }
 
         [Test]

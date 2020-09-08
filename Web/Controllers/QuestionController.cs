@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Application.Dto;
 using Application.Entities;
 using Application.Interfaces;
@@ -17,16 +18,19 @@ namespace Web.Controllers
     public class QuestionController : ControllerBase
     {
         private readonly IMapper _mapper;
+        private readonly IAuthorizationService _authorizationService;
         private readonly IQuestionService _questionService;
         private readonly ILogger<QuestionController> _logger;
 
         public QuestionController(
             IMapper mapper,
+            IAuthorizationService authorizationService,
             IQuestionService questionService,
             ILogger<QuestionController> logger
             )
         {
             _mapper = mapper;
+            _authorizationService = authorizationService;
             _questionService = questionService;
             _logger = logger;
         }
@@ -76,7 +80,7 @@ namespace Web.Controllers
             return Ok(_mapper.Map<QuestionDto>(question));
         }
 
-        [Authorize]
+        [Authorize(nameof(UserPolicy))]
         [HttpGet]
         [Route("random")]
         public IActionResult GetRandomQuestion()
@@ -88,7 +92,7 @@ namespace Web.Controllers
             return Ok(_mapper.Map<QuestionDto>(question));
         }
 
-        [Authorize]
+        [Authorize(nameof(UserPolicy))]
         [HttpGet]
         [Route("author")]
         public IEnumerable<QuestionDto> GetAuthorQuestions()
@@ -100,7 +104,7 @@ namespace Web.Controllers
             return _mapper.Map<IEnumerable<QuestionDto>>(questions);
         }
 
-        [Authorize]
+        [Authorize(nameof(UserPolicy))]
         [HttpPost]
         public IActionResult InsertQuestion(QuestionDto question)
         {
@@ -115,27 +119,35 @@ namespace Web.Controllers
             return Ok(_mapper.Map<QuestionDto>(createdQuestion));
         }
 
-        [Authorize(nameof(QuestionPolicy))]
+        [Authorize(nameof(UserPolicy))]
         [HttpDelete]
         [Route("{questionId}")]
-        public IActionResult DeleteQuestion(int questionId)
+        public async Task<IActionResult> DeleteQuestion(int questionId)
         {
-            var deletedQuestion = _questionService.Delete(questionId);
+            var question = _questionService.Get(questionId);
+            if (question is null) return BadRequest();
 
-            if (deletedQuestion is null) return BadRequest();
+            var authResult =  await _authorizationService.AuthorizeAsync(User, question, nameof(QuestionPolicy));
+            if (!authResult.Succeeded) return Forbid();
+
+            _questionService.Delete(question.Id);
 
             return NoContent();
         }
 
-        [Authorize(nameof(QuestionPolicy))]
+        // ToDo: Test
+        [Authorize(nameof(UserPolicy))]
         [HttpPut]
-        public IActionResult UpdateQuestion([FromHeader] string userId, QuestionDto question)
+        public async Task<IActionResult> UpdateQuestion([FromHeader] string userId, QuestionDto dto)
         {
-            question.AuthorId = userId;
+            var question = _questionService.Get(dto.Id);
+            if (question is null) return BadRequest();
 
-            var updatedQuestion = _questionService.Update(question);
+            var authResult =  await _authorizationService.AuthorizeAsync(User, question, nameof(QuestionPolicy));
+            if (!authResult.Succeeded) return Forbid();
 
-            if (updatedQuestion is null) return BadRequest();
+            dto.AuthorId = userId;
+            _questionService.Update(dto);
 
             return NoContent();
         }

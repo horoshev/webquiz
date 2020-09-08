@@ -18,7 +18,9 @@ namespace FunctionalTests
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
+            var userId = Request.Headers["userId"].ToString();
+
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, userId) };
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, "Test");

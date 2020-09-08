@@ -1,15 +1,11 @@
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using Application.Entities;
 using Application.Interfaces;
 using Application.Services;
 using AutoMapper;
 using Data;
-using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -72,8 +68,10 @@ namespace Web
                 // });
 
             services.AddAuthorization(options =>
-                options.AddPolicy(nameof(QuestionPolicy),
-                    policy => policy.Requirements = QuestionPolicy.Requirements));
+            {
+                options.AddPolicy(nameof(UserPolicy), policy => policy.Requirements = UserPolicy.Requirements);
+                options.AddPolicy(nameof(QuestionPolicy), policy => policy.Requirements = QuestionPolicy.Requirements);
+            });
 
             services.AddMetrics();
             services.AddAutoMapper(typeof(Startup));
@@ -94,6 +92,7 @@ namespace Web
         {
             container.RegisterType<IUnitOfWork, UnitOfWork>(TransientLifetimeManager.Instance);
             container.RegisterType<IQuestionService, QuestionService>(TransientLifetimeManager.Instance);
+            // container.RegisterType<IAuthorizationHandler, QuestionOperationsAuthorizationHandler>(TransientLifetimeManager.Instance);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

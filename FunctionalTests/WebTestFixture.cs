@@ -1,12 +1,9 @@
-using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Claims;
 using Application.Entities;
 using Data;
 using FunctionalTests.Data.Seed;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -34,7 +31,9 @@ namespace FunctionalTests
             services.AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
             services.AddDbContext<WebQuizDbContext>(builder =>
             {
-                builder.UseInMemoryDatabase("app");
+                builder.UseInMemoryDatabase("test");
+                // builder.UseInMemoryDatabase($"test-{Guid.NewGuid()}");
+                // builder.UseInternalServiceProvider(provider);
             });
 
             // Re-configure Identity
@@ -51,38 +50,12 @@ namespace FunctionalTests
             QuestionContextSeed.SeedAsync(userManager, context).Wait();
         }
 
-        public static HttpClient AuthenticateUser(HttpClient user)
+        public static HttpClient AuthenticateUser(HttpClient user, string userId = "123")
         {
-            // ToDo: Set user identifier claims
             user.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Testing");
+            user.DefaultRequestHeaders.Add(nameof(userId), userId);
 
             return user;
         }
-
-/*
-        public static void AuthenticateUser(HttpClient user)
-        {
-            user.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue();
-        }
-
-        private string GenerateToken(IDataProtector protector)
-        {
-            // Generate an OAuth bearer token for ASP.NET/Owin Web Api service that uses the default OAuthBearer token middleware.
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, "WebApiUser"),
-                new Claim(ClaimTypes.Role, "User"),
-                new Claim(ClaimTypes.Role, "PowerUser"),
-            };
-            var identity = new ClaimsIdentity(claims, "Test");
-
-            // Use the same token generation logic as the OAuthBearer Owin middleware.
-            var tdf = new TicketDataFormat(protector);
-            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), new AuthenticationProperties { ExpiresUtc = DateTime.UtcNow.AddHours(1) });
-            var accessToken = tdf.Protect(ticket);
-
-            return accessToken;
-        }
-        */
     }
 }
