@@ -1,7 +1,9 @@
 ﻿using System.Threading.Tasks;
+using Application.Entities;
 using Application.Interfaces;
 using Application.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers
@@ -20,6 +22,7 @@ namespace Web.Controllers
             _mapper = mapper;
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost]
         [Route("{count}")]
         public async Task<IActionResult> GenerateQuestions(int count)

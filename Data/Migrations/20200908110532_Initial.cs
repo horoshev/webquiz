@@ -97,8 +97,8 @@ namespace Data.Migrations
                     CorrectAnswers = table.Column<string>(nullable: false),
                     IncorrectAnswers = table.Column<string>(nullable: false),
                     Sources = table.Column<string>(nullable: false),
-                    CreatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 25, 15, 58, 19, 302, DateTimeKind.Local).AddTicks(6828)),
-                    UpdatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 8, 25, 15, 58, 19, 305, DateTimeKind.Local).AddTicks(4986))
+                    CreatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 9, 8, 18, 5, 32, 183, DateTimeKind.Local).AddTicks(6766)),
+                    UpdatedAt = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2020, 9, 8, 18, 5, 32, 186, DateTimeKind.Local).AddTicks(1146))
                 },
                 constraints: table =>
                 {
@@ -151,8 +151,8 @@ namespace Data.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(nullable: false),
+                    ProviderKey = table.Column<string>(nullable: false),
                     ProviderDisplayName = table.Column<string>(nullable: true),
                     UserId = table.Column<string>(nullable: false)
                 },
@@ -196,8 +196,8 @@ namespace Data.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(nullable: false),
-                    LoginProvider = table.Column<string>(maxLength: 128, nullable: false),
-                    Name = table.Column<string>(maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
                     Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>

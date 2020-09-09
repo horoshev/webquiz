@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Application.Entities;
 using Application.Interfaces;
 using Application.Services;
@@ -6,6 +7,8 @@ using Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -32,6 +35,7 @@ namespace Web
         {
             ConfigureDatabase(services);
 
+            // services.AddDefaultIdentity<>()
             services.AddDefaultIdentity<User>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
@@ -44,7 +48,11 @@ namespace Web
 
                     options.SignIn.RequireConfirmedAccount = true;
                 })
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<WebQuizDbContext>();
+
+            ConfigureRoles(services).Wait();
+            ConfigureUsers(services).Wait();
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();
@@ -52,20 +60,20 @@ namespace Web
             // var credential = new X509Certificate2(File.ReadAllBytes("webquiz.pfx"), "password");
             services.AddIdentityServer()
                 .AddApiAuthorization<User, WebQuizDbContext>();
-                // .AddTestUsers(Config.TestUsers);
-                // .AddSigningCredential(credential)
-                // .AddInMemoryClients(new []
-                // {
-                //     new Client
-                //     {
-                //         ClientId = "Web",
-                //         ClientName = "Web",
-                //         AllowedGrantTypes = GrantTypes.Code,
-                //
-                //         AllowOfflineAccess = true,
-                //         AllowedScopes = { "openid", "profile", "WebAPI" }
-                //     }
-                // });
+            //    .AddTestUsers(Config.TestUsers);
+            //    .AddSigningCredential(credential)
+            //    .AddInMemoryClients(new []
+            //    {
+            //        new Client
+            //        {
+            //            ClientId = "Web",
+            //            ClientName = "Web",
+            //            AllowedGrantTypes = GrantTypes.Code,
+            //   
+            //            AllowOfflineAccess = true,
+            //            AllowedScopes = { "openid", "profile", "WebAPI" }
+            //        }
+            //    });
 
             services.AddAuthorization(options =>
             {
@@ -93,6 +101,24 @@ namespace Web
             container.RegisterType<IUnitOfWork, UnitOfWork>(TransientLifetimeManager.Instance);
             container.RegisterType<IQuestionService, QuestionService>(TransientLifetimeManager.Instance);
             // container.RegisterType<IAuthorizationHandler, QuestionOperationsAuthorizationHandler>(TransientLifetimeManager.Instance);
+        }
+
+        private static async Task ConfigureRoles(IServiceCollection services)
+        {
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var scopeServices = scope.ServiceProvider;
+            var roleManager = scopeServices.GetRequiredService<RoleManager<IdentityRole>>();
+            await ContextSeeder.SeedRolesAsync(roleManager);
+        }
+
+        private static async Task ConfigureUsers(IServiceCollection services)
+        {
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var scopeServices = scope.ServiceProvider;
+            var userManager = scopeServices.GetRequiredService<UserManager<User>>();
+            // var context = scopeServices.GetRequiredService<WebQuizDbContext>();
+            await ContextSeeder.SeedAdminUser(userManager);
+            await ContextSeeder.SeedCommonUser(userManager);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

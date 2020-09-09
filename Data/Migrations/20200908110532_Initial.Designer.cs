@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(WebQuizDbContext))]
-    [Migration("20200825085819_Initial")]
+    [Migration("20200908110532_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,7 +38,7 @@ namespace Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2020, 8, 25, 15, 58, 19, 302, DateTimeKind.Local).AddTicks(6828));
+                        .HasDefaultValue(new DateTime(2020, 9, 8, 18, 5, 32, 183, DateTimeKind.Local).AddTicks(6766));
 
                     b.Property<int>("Difficulty")
                         .HasColumnType("INTEGER");
@@ -65,7 +65,7 @@ namespace Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2020, 8, 25, 15, 58, 19, 305, DateTimeKind.Local).AddTicks(4986));
+                        .HasDefaultValue(new DateTime(2020, 9, 8, 18, 5, 32, 186, DateTimeKind.Local).AddTicks(1146));
 
                     b.HasKey("Id");
 
@@ -301,12 +301,10 @@ namespace Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(128);
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(128);
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("TEXT");
@@ -343,12 +341,10 @@ namespace Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(128);
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(128);
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Value")
                         .HasColumnType("TEXT");

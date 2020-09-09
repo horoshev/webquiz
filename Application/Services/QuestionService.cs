@@ -65,7 +65,7 @@ namespace Application.Services
         private static Question PatchValues(Question original, QuestionDto request)
         {
             original.Text = request.Text;
-            original.CorrectAnswers = string.Join(' ', request.CorrectAnswers); // TODO: Fix
+            original.CorrectAnswers = Question.JoinAnswers(request.CorrectAnswers);
             original.Explanation = request.Explanation;
 
             return original;
