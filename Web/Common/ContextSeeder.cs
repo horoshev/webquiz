@@ -28,7 +28,7 @@ namespace Web.Common
                 EmailConfirmed = true
             };
 
-            var dbUser = userManager.Users.First(u => u.Email == adminEmail);
+            var dbUser = userManager.Users.FirstOrDefault(u => u.Email == adminEmail);
             // await userManager.DeleteAsync(admin);
             if (dbUser is null)
             {
@@ -49,7 +49,7 @@ namespace Web.Common
                 EmailConfirmed = true
             };
 
-            var dbUser = userManager.Users.First(u => u.Email == userEmail);
+            var dbUser = userManager.Users.FirstOrDefault(u => u.Email == userEmail);
             // await userManager.DeleteAsync(dbUser);
             if (dbUser is null)
             {

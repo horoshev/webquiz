@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,9 +32,9 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            ConfigureDatabase(services);
+            services.AddDbContext<WebQuizDbContext>(builder =>
+                builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            // services.AddDefaultIdentity<>()
             services.AddDefaultIdentity<User>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
@@ -49,10 +48,8 @@ namespace Web
                     options.SignIn.RequireConfirmedAccount = true;
                 })
                 .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<WebQuizDbContext>();
-
-            ConfigureRoles(services).Wait();
-            ConfigureUsers(services).Wait();
+                .AddEntityFrameworkStores<WebQuizDbContext>()
+                .AddClaimsPrincipalFactory<WebQuizUserClaimsPrincipalFactory>();
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();
@@ -88,12 +85,8 @@ namespace Web
             services.AddRazorPages();
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/dist"; });
-        }
 
-        protected virtual void ConfigureDatabase(IServiceCollection services)
-        {
-            services.AddDbContext<WebQuizDbContext>(builder =>
-                builder.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            SeedData(services).Wait();
         }
 
         public void ConfigureContainer(IUnityContainer container)
@@ -103,20 +96,27 @@ namespace Web
             // container.RegisterType<IAuthorizationHandler, QuestionOperationsAuthorizationHandler>(TransientLifetimeManager.Instance);
         }
 
-        private static async Task ConfigureRoles(IServiceCollection services)
+        protected virtual async Task SeedData(IServiceCollection services)
         {
             using var scope = services.BuildServiceProvider().CreateScope();
             var scopeServices = scope.ServiceProvider;
+            var context = scopeServices.GetRequiredService<WebQuizDbContext>();
+            await context.Database.EnsureCreatedAsync();
+
+            var userManager = scopeServices.GetRequiredService<UserManager<User>>();
             var roleManager = scopeServices.GetRequiredService<RoleManager<IdentityRole>>();
+
+            await ConfigureRoles(roleManager);
+            await ConfigureUsers(userManager);
+        }
+
+        private static async Task ConfigureRoles(RoleManager<IdentityRole> roleManager)
+        {
             await ContextSeeder.SeedRolesAsync(roleManager);
         }
 
-        private static async Task ConfigureUsers(IServiceCollection services)
+        private static async Task ConfigureUsers(UserManager<User> userManager)
         {
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var scopeServices = scope.ServiceProvider;
-            var userManager = scopeServices.GetRequiredService<UserManager<User>>();
-            // var context = scopeServices.GetRequiredService<WebQuizDbContext>();
             await ContextSeeder.SeedAdminUser(userManager);
             await ContextSeeder.SeedCommonUser(userManager);
         }

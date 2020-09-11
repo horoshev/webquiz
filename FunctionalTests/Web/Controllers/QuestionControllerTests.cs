@@ -20,7 +20,7 @@ namespace FunctionalTests.Web.Controllers
     {
         public QuestionControllerTests(WebTestFixture factory)
         {
-            Factory = factory;
+            Factory = factory; //.Build();
         }
 
         private WebTestFixture Factory { get; }

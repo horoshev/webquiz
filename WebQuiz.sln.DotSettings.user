@@ -3,11 +3,15 @@
   &lt;Assembly Path="C:\Users\artem\.nuget\packages\identityserver4.entityframework.storage\3.0.0\lib\netstandard2.1\IdentityServer4.EntityFramework.Storage.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\artem\.nuget\packages\moq\4.14.5\lib\netstandard2.0\Moq.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	
-	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=4139ee5d_002D57e9_002D4508_002Dad30_002D73102da153f3/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Solution /&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e70ec1dc_002Db91a_002D4d57_002D955a_002D4505b9ba15cb/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;And&gt;&#xD;
+    &lt;Project Location="D:\dev\WebQuiz\FunctionalTests" Presentation="&amp;lt;Tests&amp;gt;\&amp;lt;FunctionalTests&amp;gt;" /&gt;&#xD;
+    &lt;Namespace&gt;FunctionalTests.Web.Controllers&lt;/Namespace&gt;&#xD;
+  &lt;/And&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
+	
+	
 	
 	
 	

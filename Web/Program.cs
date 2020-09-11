@@ -1,3 +1,4 @@
+using System.Reflection;
 using App.Metrics.AspNetCore;
 using App.Metrics.Formatters.Prometheus;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +30,6 @@ namespace Web
                         endpointsOptions.EnvironmentInfoEndpointEnabled = false;
                     };
                 })
-                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(typeof(Startup).GetTypeInfo().Assembly.FullName));
     }
 }

@@ -2,6 +2,7 @@ import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {Question} from "../../types/Question";
 import {HttpClient} from "@angular/common/http";
 import {DialogComponent} from "../dialog/dialog.component";
+import {AuthorizeService} from "../../api-authorization/authorize.service";
 
 @Component({
   selector: 'app-profile',
@@ -18,6 +19,7 @@ export class ProfileComponent implements OnInit {
     'settings'
   ]
 
+  isAdmin: boolean
   modifiedQuestion: any = null
   questionToEdit: Question
   createdQuestions: Question[] = []
@@ -25,7 +27,12 @@ export class ProfileComponent implements OnInit {
   @ViewChild('confirmation', {static: false}) private confirmationDialog: DialogComponent
   @ViewChild('edit', {static: false}) private editDialog: DialogComponent
 
-  constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) { }
+  constructor(private authorizeService: AuthorizeService, private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {
+    // this.isAdmin =
+
+    let user = authorizeService.getUser().subscribe(value => console.log(value))
+    console.log(user)
+  }
 
   ngOnInit() {
     this.http.get<Question[]>(this.baseUrl + `api/question/author`).subscribe(
