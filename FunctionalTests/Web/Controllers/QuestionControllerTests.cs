@@ -54,12 +54,25 @@ namespace FunctionalTests.Web.Controllers
         {
             var anonymousUser = Factory.CreateClient();
 
-            var response = await anonymousUser.GetAsync("api/question/");
+            var response = await anonymousUser.GetAsync("api/question/query");
             var body = await response.Content.ReadAsStringAsync();
             var content = JsonConvert.DeserializeObject<IEnumerable<QuestionDto>>(body);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
             content.Should().HaveCount(QuestionContextSeed.TestQuestions.Count());
+        }
+
+        [Fact]
+        public async Task _ReturnsOkPageGivenAnonymousUser()
+        {
+            var anonymousUser = Factory.CreateClient();
+
+            var response = await anonymousUser.GetAsync("api/question/");
+            var body = await response.Content.ReadAsStringAsync();
+            var content = JsonConvert.DeserializeObject<Page<QuestionDto>>(body);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            content.Data.Should().HaveCount(QuestionContextSeed.TestQuestions.Count());
         }
 
         [Fact]

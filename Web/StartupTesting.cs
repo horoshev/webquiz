@@ -67,6 +67,7 @@ namespace Web
             app.UseDatabaseErrorPage();
 
             app.UseRouting();
+            // app.UseSpaStaticFiles(); // StaticFiles();
 
             app.UseAuthentication();
             app.UseAuthorization();

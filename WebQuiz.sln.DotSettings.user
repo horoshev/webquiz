@@ -3,12 +3,17 @@
   &lt;Assembly Path="C:\Users\artem\.nuget\packages\identityserver4.entityframework.storage\3.0.0\lib\netstandard2.1\IdentityServer4.EntityFramework.Storage.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\artem\.nuget\packages\moq\4.14.5\lib\netstandard2.0\Moq.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e70ec1dc_002Db91a_002D4d57_002D955a_002D4505b9ba15cb/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;And&gt;&#xD;
-    &lt;Project Location="D:\dev\WebQuiz\FunctionalTests" Presentation="&amp;lt;Tests&amp;gt;\&amp;lt;FunctionalTests&amp;gt;" /&gt;&#xD;
-    &lt;Namespace&gt;FunctionalTests.Web.Controllers&lt;/Namespace&gt;&#xD;
-  &lt;/And&gt;&#xD;
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=707c8fd8_002D7a86_002D41ed_002Da060_002De45755f75d0b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=df88b2f5_002Dd596_002D48d6_002Dba22_002De6a1df76d026/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;Tests&amp;gt;\&amp;lt;UnitTests&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="D:\dev\WebQuiz\UnitTests" Presentation="&amp;lt;Tests&amp;gt;\&amp;lt;UnitTests&amp;gt;" /&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=ff797dce_002Dd0fa_002D49f7_002D812d_002De57c209a36e0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from Solution #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Solution /&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	
 	
 	
 	

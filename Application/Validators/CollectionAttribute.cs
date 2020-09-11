@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace Application.Validators
 {
+    [AttributeUsage(AttributeTargets.Property)]
     public class CollectionAttribute : ValidationAttribute
     {
         public int MinElementLength { get; set; }

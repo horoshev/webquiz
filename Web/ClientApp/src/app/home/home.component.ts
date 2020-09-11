@@ -1,7 +1,13 @@
 import {Component, HostListener, Inject} from '@angular/core';
-import {Question} from "../../types/Question";
+import {Question, QuestionOrderOptions} from "../../types/Question";
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {QuestionQuery} from "../../types/QuestionQuery";
+
+class Page<T> {
+  data: Question[]
+  pageSize: number
+  pageNumber: number
+}
 
 @Component({
   selector: 'app-home',
@@ -13,6 +19,10 @@ export class HomeComponent {
   questions: Question[] = []
   questionQuery = new QuestionQuery()
 
+  orderOptions = QuestionOrderOptions
+  emptyOrder: {orderBy: '', isAscendingOrder: true}
+  selectedOrder: { orderBy: string, isAscendingOrder: boolean } = this.emptyOrder
+
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {
     this.loadQuestions()
   }
@@ -21,10 +31,10 @@ export class HomeComponent {
     console.log("LOADING!!!")
     if (this.isEnd) return
     this.isLoading = true
-    this.http.get<Question[]>(this.baseUrl + 'api/question', {params: this.questionQuery}).subscribe(
+    this.http.get<Page<Question>>(this.baseUrl + 'api/question', {params: this.questionQuery}).subscribe(
       result => {
-        if (result.length < +this.questionQuery.pageSize) this.isEnd = true
-        this.questions.push(...result)
+        if (result.data.length < +this.questionQuery.pageSize) this.isEnd = true
+        this.questions.push(...result.data)
       },
       error => console.error(error)
     ).add(() => this.isLoading = false)
@@ -33,7 +43,7 @@ export class HomeComponent {
   onFilterChange(query: QuestionQuery) {
     this.questions = []
     this.questionQuery = query
-    this.questionQuery.startPage = '0'
+    this.questionQuery.pageNumber = '0'
     this.questionQuery.pageSize = '10'
     this.isEnd = false
     this.loadQuestions();
@@ -54,8 +64,17 @@ export class HomeComponent {
 
     if (threshold > lastQuestion.offsetTop && !this.isLoading && !this.isEnd) {
       // console.log(threshold, lastQuestion.offsetTop, 'boom')
-      this.questionQuery.startPage = String(+this.questionQuery.startPage + 1)
+      this.questionQuery.pageNumber = String(+this.questionQuery.pageNumber + 1)
       this.loadQuestions()
     }
+  }
+
+  onOrderChange() {
+    console.log(this.selectedOrder)
+    this.questions = []
+    this.isEnd = false
+    this.questionQuery.orderBy = this.selectedOrder.orderBy
+    this.questionQuery.isAscendingOrder = this.selectedOrder.isAscendingOrder
+    this.loadQuestions()
   }
 }

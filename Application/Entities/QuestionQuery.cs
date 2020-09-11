@@ -4,13 +4,13 @@ using Application.Extensions;
 
 namespace Application.Entities
 {
-    public class QuestionQuery
+    public class QuestionQuery : PagingQuery<Question>
     {
         public int? Type { get; set; }
         public int? Category { get; set; }
         public int? Difficulty { get; set; }
 
-        public Expression<Func<Question, bool>> Expression => ToExpression();
+        public override Expression<Func<Question, bool>> Condition => ToExpression();
 
         private Expression<Func<Question, bool>> ToExpression()
         {

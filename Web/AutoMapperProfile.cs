@@ -21,9 +21,23 @@ namespace Web
                 .ForMember(question => question.AuthorId, member => member.MapFrom(question => "93e584ea-1846-43bc-9906-36beb0cff48c"))
                 .ForMember(question => question.Text, member => member.MapFrom(question => question.Question))
                 .ForMember(question => question.Category, member => member.MapFrom<CategoryResolver>())
-                .ForMember(question => question.Difficulty, member => member.MapFrom(question => question.Difficulty))
+                .ForMember(question => question.Difficulty, member => member.MapFrom(question => MapQuestionDifficulty(question.Difficulty)))
                 .ForMember(question => question.CorrectAnswers, member => member.MapFrom(question => question.CorrectAnswer))
-                .ForMember(question => question.IncorrectAnswers, member => member.MapFrom(question => string.Join('|', question.IncorrectAnswers)));
+                .ForMember(question => question.IncorrectAnswers, member => member.MapFrom(question => Question.JoinAnswers(question.IncorrectAnswers)));
+
+            CreateMap<Page<Question>, Page<QuestionDto>>()
+                .ForMember(pageOut => pageOut.Data, member => member.MapFrom(pageIn => pageIn.Data));
+        }
+
+        private static QuestionDifficulty MapQuestionDifficulty(string questionType)
+        {
+            return questionType switch
+            {
+                "hard" => QuestionDifficulty.Hard,
+                "medium" => QuestionDifficulty.Medium,
+                "easy" => QuestionDifficulty.Easy,
+                _ => QuestionDifficulty.None
+            };
         }
     }
 

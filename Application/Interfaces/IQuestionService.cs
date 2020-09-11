@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Application.Dto;
 using Application.Entities;
 using Application.Services;
@@ -20,6 +21,13 @@ namespace Application.Interfaces
         /// <param name="query">Query with question parameters.</param>
         /// <returns>Questions matches query parameters.</returns>
         IEnumerable<Question> GetQuestionsByQuery(QuestionQuery query);
+
+        /// <summary>
+        /// Returning question page.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        Task<Page<Question>> GetQuestionPageByQuery(QuestionQuery query);
 
         /// <summary>
         /// Returning all questions with provided authorId.

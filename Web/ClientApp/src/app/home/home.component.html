@@ -13,8 +13,20 @@
 
 <hr/>
 
-<div class="mb-5">
+<div class="mb-4">
   <app-question-filter [query]="questionQuery" (queryChange)="onFilterChange($event)"></app-question-filter>
+</div>
+
+<div class="mb-4 text-right">
+  <div class="d-inline-flex">
+    <select class="custom-select" [(ngModel)]="selectedOrder" (change)="onOrderChange()">
+      <option selected [ngValue]="emptyOrder">Select Order</option>
+      <ng-container *ngFor="let option of orderOptions">
+        <option [ngValue]="{orderBy: option.value, isAscendingOrder: true}">{{option.label}} (Low to High)</option>
+        <option [ngValue]="{orderBy: option.value, isAscendingOrder: false}">{{option.label}} (High to Low)</option>
+      </ng-container>
+    </select>
+  </div>
 </div>
 
 <app-empty-content *ngIf="questions.length == 0 && !isLoading; else elseBlock">

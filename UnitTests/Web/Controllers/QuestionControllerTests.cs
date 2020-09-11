@@ -302,7 +302,7 @@ namespace Tests.Web.Controllers
 
             questionServiceMock
                 .Setup(service => service.GetQuestionsByQuery(It.IsAny<QuestionQuery>()))
-                .Returns<QuestionQuery>(query => _testQuestions.Where(query.Expression.Compile()));
+                .Returns<QuestionQuery>(query => _testQuestions.Where(query.Condition.Compile()));
 
             questionServiceMock
                 .Setup(service => service.Get(It.IsAny<int>()))

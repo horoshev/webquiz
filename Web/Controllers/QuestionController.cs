@@ -62,11 +62,18 @@ namespace Web.Controllers
         }
 
         [HttpGet]
+        [Route("query")]
         public IEnumerable<QuestionDto> GetQuestions([FromQuery] QuestionQuery query, [FromQuery] PagingQuery paging)
         {
             return _mapper.Map<IEnumerable<QuestionDto>>(_questionService.GetQuestionsByQuery(query))
                 .Skip(paging.StartPage * paging.PageSize)
                 .Take(paging.PageSize);
+        }
+
+        [HttpGet]
+        public async Task<Page<QuestionDto>> GetQuestionPage([FromQuery] QuestionQuery query)
+        {
+            return _mapper.Map<Page<QuestionDto>>(await _questionService.GetQuestionPageByQuery(query));
         }
 
         [HttpGet]

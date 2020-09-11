@@ -1,5 +1,18 @@
 <div class="question-wrapper shadow question-item question-card shadow">
   <div class="mb-3">
+    <div class="d-flex mb-2">
+      <div [ngSwitch]="+question.difficulty" class="mr-1">
+        <span *ngSwitchCase="'0'" class="badge badge-secondary">{{Difficulty}}</span>
+        <span *ngSwitchCase="'1'" class="badge badge-warning">{{Difficulty}}</span>
+        <span *ngSwitchCase="'2'" class="badge badge-danger">{{Difficulty}}</span>
+      </div>
+      <div class="mr-1">
+        <span class="badge badge-info">{{Type}}</span>
+      </div>
+      <div class="mr-1">
+        <span class="badge badge-dark">{{Category}}</span>
+      </div>
+    </div>
     <a class="h3 text-dark" routerLink="/question/{{question.id}}">#{{question.id}}</a>
   </div>
   <p>{{question.text}}</p>

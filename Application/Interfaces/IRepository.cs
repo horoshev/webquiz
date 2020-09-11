@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Application.Entities;
 
 namespace Application.Interfaces
 {
@@ -14,6 +16,8 @@ namespace Application.Interfaces
         {
             SaveChanges();
         }
+
+        Task<Page<T>> Query(PagingQuery<T> pagingQuery);
 
         /// <summary>
         /// Select questions with specified query.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Application.Dto;
 using Application.Entities;
 using Application.Interfaces;
@@ -22,11 +23,18 @@ namespace Application.Services
             return Repository.GetByIndex(index);
         }
 
-        public IEnumerable<Question> GetQuestionsByQuery(QuestionQuery query)
+        public IEnumerable<Question> GetQuestionsByQuery(QuestionQuery? query)
         {
             query ??= new QuestionQuery();
 
-            return Repository.Query(query.Expression);
+            return Repository.Query(query.Condition);
+        }
+
+        public Task<Page<Question>> GetQuestionPageByQuery(QuestionQuery? query)
+        {
+            query ??= new QuestionQuery();
+
+            return Repository.Query(query);
         }
 
         public IEnumerable<Question> GetQuestionByAuthorId(string authorId)
@@ -45,20 +53,8 @@ namespace Application.Services
                 .Select(question => Mapper.Map<Question>(question))
                 .Select(question => Repository.Create(question)).ToList();
 
-            // Repository.Create(new Question
-            // {
-            //     AuthorId = "93e584ea-1846-43bc-9906-36beb0cff48c",
-            //     Type = QuestionType.Boolean,
-            //     Category = QuestionCategory.Animals,
-            //     Difficulty = QuestionDifficulty.Easy,
-            //     Text = "Anime?",
-            //     CorrectAnswers = "Yes",
-            //     IncorrectAnswers = "No"
-            // });
-
             Repository.SaveChanges();
 
-            // return created;
             return Enumerable.Empty<Question>();
         }
 
